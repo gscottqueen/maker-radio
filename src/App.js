@@ -5,6 +5,7 @@ class App extends Component {
     return (
       <div className="App">
         <header className="App-header">
+        <a href='http://localhost:8888'> Login to Spotify </a>
         </header>
       </div>
     );
