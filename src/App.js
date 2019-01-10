@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import Button from './components/Button';
 
 var Spotify = require('spotify-web-api-js');
 var spotifyApi = new Spotify();
@@ -45,16 +46,13 @@ class App extends Component {
   render() {
     return (
       <div className="App">
-        <a href='http://localhost:8888' > Login to Spotify </a>
-        <div>
-          Now Playing: { this.state.nowPlaying.name }
-        </div>
+        <button className="spotify-login"><a href='http://localhost:8888' > Login to Spotify</a></button>
         <div>
           <img src={this.state.nowPlaying.albumArt} style={{ height: 150 }}/>
           { this.state.loggedIn &&
-            <button onClick={() => this.getNowPlaying()}>
+            <Button primary onClick={() => this.getNowPlaying()}>
               Check Now Playing
-            </button>
+            </Button>
           }
         </div>
       </div>
