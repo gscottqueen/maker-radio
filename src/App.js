@@ -1,6 +1,9 @@
 import React, { Component } from 'react';
-import Button from './components/Button';
 
+// Styles
+import SpotifyButton from './components/SpotifyButton';
+
+// Spotify wrapper library
 var Spotify = require('spotify-web-api-js');
 var spotifyApi = new Spotify();
 
@@ -15,11 +18,24 @@ class App extends Component {
     }
     this.state = {
       loggedIn: token ? true : false,
-      nowPlaying: { name: 'Not Checked', albumArt: '' }
+      nowPlaying: {
+        response: false, 
+        artist: '', 
+        albumArt: ''
+      },
+      user: {
+        response: false,
+        name: '',
+        image: ''
+      }
     }
   }
-
-  getHashParams() {
+  /**
+   * Obtains parameters from the hash of the URL
+   * @return Object
+   */
+  // from tutorial, need to understand more what is happening here
+  getHashParams(){
     var hashParams = {};
     var e, r = /([^&;=]+)=?([^&;]*)/g,
         q = window.location.hash.substring(1);
@@ -34,26 +50,47 @@ class App extends Component {
   getNowPlaying(){
     spotifyApi.getMyCurrentPlaybackState()
       .then((response) => {
+        console.log(response)
         this.setState({
           nowPlaying: { 
-              name: response.item.name, 
+              response: true,
+              artist: response.item.name, 
               albumArt: response.item.album.images[0].url
             }
         });
       })
   }
 
+  getUserProfile(){
+    spotifyApi.getMe()
+      .then((response) => {
+        console.log(response)
+        this.setState({
+          user: {
+            response: true,
+            name: response.display_name,
+            image: response.images[0].url
+          }
+        });
+      })
+  }
+
   render() {
     return (
-      <div className="App">
-        <button className="spotify-login"><a href='http://localhost:8888' > Login to Spotify</a></button>
-        <div>
-          <img src={this.state.nowPlaying.albumArt} style={{ height: 150 }}/>
-          { this.state.loggedIn &&
-            <Button primary onClick={() => this.getNowPlaying()}>
-              Check Now Playing
-            </Button>
-          }
+      <div 
+        className="App" 
+        style={{ margin: '200px' }}>
+          {this.state.loggedIn && this.state.nowPlaying.response === false ? this.getNowPlaying() : null }
+          {this.state.loggedIn && this.state.user.response === false ? this.getUserProfile() : null }
+          {this.state.nowPlaying.response === true ?
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', alignContent: 'center' }}>
+            <h1>Now Playing</h1>
+            <img src={this.state.nowPlaying.albumArt} style={{ height: 150 }} alt="album cover"/>
+            <p style={{ textAlign: 'center' }}>{this.state.nowPlaying.artist}</p>
+          </div>
+          : null }
+          <div style={{ position : 'absolute', right: '20px', bottom: '20px' }}>
+            <SpotifyButton profileImage={this.state.user.image}></SpotifyButton>
         </div>
       </div>
     );
