@@ -18,6 +18,14 @@ class App extends Component {
     }
     this.state = {
       loggedIn: token ? true : false,
+      makerPlaylist: {
+        response: false,
+        tracks: {},
+        nowPlaying: {
+          artist: '',
+          albumArt: ''
+        }
+      },
       nowPlaying: {
         response: false, 
         artist: '', 
@@ -50,7 +58,6 @@ class App extends Component {
   getNowPlaying(){
     spotifyApi.getMyCurrentPlaybackState()
       .then((response) => {
-        console.log(response)
         this.setState({
           nowPlaying: { 
               response: true,
@@ -64,7 +71,6 @@ class App extends Component {
   getUserProfile(){
     spotifyApi.getMe()
       .then((response) => {
-        console.log(response)
         this.setState({
           user: {
             response: true,
@@ -75,16 +81,46 @@ class App extends Component {
       })
   }
 
+  getMakerRadioPlaylist(){
+    spotifyApi.getPlaylist('1PCdCzRKLLmd8XvVLw8eV7')
+      .then((response) => {
+        console.log(response)
+        console.log(response.tracks.items[0].track.name)
+        console.log(response.tracks.items[0].track.album.images[0].url)
+
+        this.setState({
+          makerPlaylist: {
+            response: true,
+            tracks: response.tracks,
+            nowPlaying: {
+              artist: response.tracks.items[0].track.name,
+              albumArt: response.tracks.items[0].track.album.images[0].url,
+              trackID: response.tracks.items[0].track.id
+            }
+          }
+        });
+      })
+  }
+
   render() {
     return (
       <div 
         className="App" 
         style={{ margin: '200px' }}>
+
           {this.state.loggedIn && this.state.nowPlaying.response === false ? this.getNowPlaying() : null }
           {this.state.loggedIn && this.state.user.response === false ? this.getUserProfile() : null }
+          {this.state.makerPlaylist.response === false ? this.getMakerRadioPlaylist() : null }
+
+          <div>
+          <h1>Maker Playing</h1>
+            <img src={this.state.makerPlaylist.nowPlaying.albumArt} style={{ height: 150 }} alt="album cover"/>
+            <p style={{}}>{this.state.makerPlaylist.nowPlaying.artist}</p>
+          </div>
+
           {this.state.nowPlaying.response === true ?
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', alignContent: 'center' }}>
-            <h1>Now Playing</h1>
+            <h1>User Playing</h1>
             <img src={this.state.nowPlaying.albumArt} style={{ height: 150 }} alt="album cover"/>
             <p style={{ textAlign: 'center' }}>{this.state.nowPlaying.artist}</p>
           </div>
