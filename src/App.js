@@ -3,6 +3,9 @@ import React, { Component } from 'react';
 // Styles
 import SpotifyButton from './components/SpotifyButton';
 
+// module for color getter
+import Palette from 'react-palette'
+
 // Spotify wrapper library
 var Spotify = require('spotify-web-api-js');
 var spotifyApi = new Spotify();
@@ -82,7 +85,7 @@ class App extends Component {
   }
 
   getMakerRadioPlaylist(){
-    spotifyApi.getPlaylist('1PCdCzRKLLmd8XvVLw8eV7')
+    spotifyApi.getPlaylist(process.env.MAKER_PLAYLIST)
       .then((response) => {
         console.log(response)
         console.log(response.tracks.items[0].track.name)
@@ -105,25 +108,22 @@ class App extends Component {
   render() {
     return (
       <div 
-        className="App" 
-        style={{ margin: '200px' }}>
+        className="App">
 
           {this.state.loggedIn && this.state.nowPlaying.response === false ? this.getNowPlaying() : null }
           {this.state.loggedIn && this.state.user.response === false ? this.getUserProfile() : null }
           {this.state.makerPlaylist.response === false ? this.getMakerRadioPlaylist() : null }
-
-          <div>
-          <h1>Maker Playing</h1>
-            <img src={this.state.makerPlaylist.nowPlaying.albumArt} style={{ height: 150 }} alt="album cover"/>
-            <p style={{}}>{this.state.makerPlaylist.nowPlaying.artist}</p>
-          </div>
-
+          
           {this.state.nowPlaying.response === true ?
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', alignContent: 'center' }}>
-            <h1>User Playing</h1>
-            <img src={this.state.nowPlaying.albumArt} style={{ height: 150 }} alt="album cover"/>
-            <p style={{ textAlign: 'center' }}>{this.state.nowPlaying.artist}</p>
-          </div>
+          <Palette image={this.state.nowPlaying.albumArt}>
+            {palette => (
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', alignContent: 'center', backgroundImage: 'linear-gradient(' + palette.lightVibrant + ', #FFF )', height: '100vh' }}>
+              <h1>User Playing</h1>
+              <img src={this.state.nowPlaying.albumArt} style={{ height: 150 }} alt="album cover"/>
+              <p style={{ textAlign: 'center' }}>{this.state.nowPlaying.artist}</p>
+            </div>
+            )}
+            </Palette>
           : null }
           <div style={{ position : 'absolute', right: '20px', bottom: '20px' }}>
             <SpotifyButton profileImage={this.state.user.image}></SpotifyButton>
