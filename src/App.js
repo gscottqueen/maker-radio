@@ -27,8 +27,7 @@ class App extends Component {
       token: token,
       error: '',
       deviceId: "",
-      nowPlaying: {
-        playBackResponse: false, 
+      nowPlaying: { 
         artist: '', 
         albumArt: '',
         albumName: '',
@@ -37,7 +36,7 @@ class App extends Component {
         duration: 0,
       },
       user: {
-        meResponse: false,
+        response: false,
         name: '',
         image: '',
       }
@@ -89,6 +88,7 @@ class App extends Component {
   
     // Playback status updates
     this.player.on('player_state_changed', state => { console.log(state); });
+    this.player.on('player_state_changed', state => this.onStateChanged(state));
   
     // Ready
     this.player.on('ready', data => {
@@ -106,34 +106,25 @@ class App extends Component {
         position,
         duration,
       } = state.track_window;
-      const trackName = currentTrack.name;
-      const albumName = currentTrack.album.name;
       const artistName = currentTrack.artists
         .map(artist => artist.name)
         .join(", ");
+      const trackName = currentTrack.name;
+      const albumName = currentTrack.album.name;
+      const albumArt = currentTrack.album.images[2].url
       const playing = !state.paused;
       this.setState({
-        position,
-        duration,
-        trackName,
-        albumName,
-        artistName,
-        playing
+        nowPlaying: { 
+          artistName: artistName, 
+          trackName: trackName,
+          albumName: albumName,
+          albumArt: albumArt,
+          playing: playing,
+          position: position,
+          duration: duration,
+        }
       });
     }
-  }
-
-  getNowPlaying(){
-    spotifyApi.getMyCurrentPlaybackState()
-      .then((response) => {
-        this.setState({
-          nowPlaying: { 
-              playBackResponse: true,
-              artist: response.item.name, 
-              albumArt: response.item.album.images[0].url
-            }
-        });
-      })
   }
 
   getUserProfile(){
@@ -141,7 +132,7 @@ class App extends Component {
       .then((response) => {
         this.setState({
           user: {
-            meResponse: true,
+            response: true,
             name: response.display_name,
             image: response.images[0].url
           }
@@ -175,21 +166,20 @@ class App extends Component {
       <div 
         className="App">
           {this.state.error && <p>Error: {this.state.error}</p>}
+
+          {this.state.loggedIn && this.state.user.response === false ? this.getUserProfile() : null }
           
-          {this.state.loggedIn && this.state.nowPlaying.playBackResponse === false ? this.getNowPlaying() : null }
-          {this.state.loggedIn && this.state.user.meResponse === false ? this.getUserProfile() : null }
-          
-          {this.state.nowPlaying.playBackResponse === true ?
           <Palette image={this.state.nowPlaying.albumArt}>
             {palette => (
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', alignContent: 'center', backgroundImage: 'linear-gradient(' + palette.lightVibrant + ', #FFF )', height: '100vh' }}>
-              <h1>User Playing</h1>
-              <img src={this.state.nowPlaying.albumArt} style={{ height: 150 }} alt="album cover"/>
-              <p style={{ textAlign: 'center' }}>{this.state.nowPlaying.artist}</p>
+              <h1>{this.state.nowPlaying.albumName}</h1>
+              {this.state.nowPlaying.albumArt && 
+                <img src={this.state.nowPlaying.albumArt} style={{ height: 150 }} alt="album cover"/>
+              }
+              <p style={{ textAlign: 'center' }}>{this.state.nowPlaying.artistName}</p>
             </div>
             )}
             </Palette>
-          : null }
           <div style={{ position : 'absolute', right: '20px', bottom: '20px' }}>
             <SpotifyButton profileImage={this.state.user.image}></SpotifyButton>
         </div>
