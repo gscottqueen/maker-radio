@@ -15,13 +15,17 @@ class App extends Component {
   constructor(props){
     super(props);
     const params = this.getHashParams();
-    const token = params.access_token;
+    const token = params.access_token;    
     if (token) {
       spotifyApi.setAccessToken(token);
+
+      // check every second for the sdk player.
+      this.playerCheckInterval = setInterval(() => this.checkForPlayer(), 1000);
     }
     this.state = {
       loggedIn: token ? true : false,
-      error: "",
+      token: token,
+      error: '',
       deviceId: "",
       nowPlaying: {
         playBackResponse: false, 
@@ -38,6 +42,7 @@ class App extends Component {
         image: '',
       }
     }
+    this.playerCheckInterval = null;
   }
   /**
    * Obtains parameters from the hash of the URL
@@ -56,17 +61,65 @@ class App extends Component {
     return hashParams;
   }
 
+  // This works pretty much identically to how the documentation recommends setting things up, but instead of using a constant OAuth token, we’re taking it from our app component’s state, and instead of creating a global variable called player, we just add player as one of the app’s class variables. This means that we can access it from any of the other class methods. (https://mbell.me/blog/2017-12-29-react-spotify-playback-api/)
   checkForPlayer() {
+    // alert('you gotta playa')
     if (window.Spotify !== null) {
-      alert('You got a playa!')
       this.player = new window.Spotify.Player({
-        name: "Matt's Spotify Player",
+        name: "Maker's Spotify Player",
         getOAuthToken: cb => { cb(this.state.token); },
       });
-      // this.createEventHandlers();
+      this.createEventHandlers();
   
       // finally, connect!
       this.player.connect();
+      // cacel the interval
+      clearInterval(this.playerCheckInterval);
+    }
+  }
+
+  createEventHandlers() {
+    this.player.on('initialization_error', e => { console.error(e); });
+    this.player.on('authentication_error', e => {
+      console.error(e);
+      this.setState({ loggedIn: false });
+    });
+    this.player.on('account_error', e => { console.error(e); });
+    this.player.on('playback_error', e => { console.error(e); });
+  
+    // Playback status updates
+    this.player.on('player_state_changed', state => { console.log(state); });
+  
+    // Ready
+    this.player.on('ready', data => {
+      let { device_id } = data;
+      console.log("Let the music play on!");
+      this.setState({ deviceId: device_id });
+    });
+  }
+
+  onStateChanged(state) {
+    // if we're no longer listening to music, we'll get a null state.
+    if (state !== null) {
+      const {
+        current_track: currentTrack,
+        position,
+        duration,
+      } = state.track_window;
+      const trackName = currentTrack.name;
+      const albumName = currentTrack.album.name;
+      const artistName = currentTrack.artists
+        .map(artist => artist.name)
+        .join(", ");
+      const playing = !state.paused;
+      this.setState({
+        position,
+        duration,
+        trackName,
+        albumName,
+        artistName,
+        playing
+      });
     }
   }
 
