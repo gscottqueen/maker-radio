@@ -26,10 +26,14 @@ class App extends Component {
       loggedIn: token ? true : false,
       token: token,
       error: '',
-      deviceId: "",
+      deviceId: '',
       nowPlaying: { 
         artist: '', 
-        albumArt: '',
+        albumArt: {
+          image: '',
+          width: '',
+          height: '',
+        }, 
         albumName: '',
         playing: false,
         position: 0,
@@ -93,7 +97,8 @@ class App extends Component {
     // Ready
     this.player.on('ready', data => {
       let { device_id } = data;
-      console.log("Let the music play on!");
+      this.getMakerRadioPlaylist()
+      console.log("Let the music play on!")
       this.setState({ deviceId: device_id });
     });
   }
@@ -111,14 +116,17 @@ class App extends Component {
         .join(", ");
       const trackName = currentTrack.name;
       const albumName = currentTrack.album.name;
-      const albumArt = currentTrack.album.images[2].url
+      const image = currentTrack.album.images[2].url
       const playing = !state.paused;
       this.setState({
         nowPlaying: { 
           artistName: artistName, 
           trackName: trackName,
           albumName: albumName,
-          albumArt: albumArt,
+          // albumArt: albumArt,
+          albumArt: {
+            image: image,
+          }, 
           playing: playing,
           position: position,
           duration: duration,
@@ -140,26 +148,30 @@ class App extends Component {
       })
   }
 
-  // getMakerRadioPlaylist(){
-  //   spotifyApi.getPlaylist('1PCdCzRKLLmd8XvVLw8eV7')
-  //     .then((response) => {
-  //       console.log(response)
-  //       console.log(response.tracks.items[0].track.name)
-  //       console.log(response.tracks.items[0].track.album.images[0].url)
+  getMakerRadioPlaylist(){
+    spotifyApi.getPlaylist(
+      String(process.env.REACT_APP_MAKER_PLAYLIST))
+      .then((response) => {
+        console.log(response)
 
-  //       this.setState({
-  //         makerPlaylist: {
-  //           response: true,
-  //           tracks: response.tracks,
-  //           nowPlaying: {
-  //             artist: response.tracks.items[0].track.name,
-  //             albumArt: response.tracks.items[0].track.album.images[0].url,
-  //             trackID: response.tracks.items[0].track.id
-  //           }
-  //         }
-  //       });
-  //     })
-  // }
+        this.setState({
+            nowPlaying: {
+              trackID: response.tracks.items[0].track.id,
+              artistName: response.tracks.items[0].track.artists[0].name,
+              albumArt: {
+                image: response.tracks.items[0].track.album.images[0].url,
+                width: response.tracks.items[0].track.album.images[0].width,
+                height: response.tracks.items[0].track.album.images[0].height,
+              }, 
+              trackName: response.tracks.items[0].track.name,
+              albumName: response.tracks.items[0].track.album.name,
+              // playing: playing,
+              // position: position,
+              // duration: duration,
+            }
+        });
+      })
+  }
 
   render() {
     return (
@@ -169,12 +181,16 @@ class App extends Component {
 
           {this.state.loggedIn && this.state.user.response === false ? this.getUserProfile() : null }
           
-          <Palette image={this.state.nowPlaying.albumArt}>
+          <Palette image={this.state.nowPlaying.albumArt.image}>
             {palette => (
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', alignContent: 'center', backgroundImage: 'linear-gradient(' + palette.lightVibrant + ', #FFF )', height: '100vh' }}>
               <h1>{this.state.nowPlaying.albumName}</h1>
-              {this.state.nowPlaying.albumArt && 
-                <img src={this.state.nowPlaying.albumArt} style={{ height: 150 }} alt="album cover"/>
+              {this.state.nowPlaying.albumArt.image && 
+                <img 
+                  src={this.state.nowPlaying.albumArt.image} 
+                  width={this.state.nowPlaying.albumArt.width}
+                  height={this.state.nowPlaying.albumArt.height}
+                  style={{ height: this.props.height, width: this.props.width }} alt="album cover"/>
               }
               <p style={{ textAlign: 'center' }}>{this.state.nowPlaying.artistName}</p>
             </div>
