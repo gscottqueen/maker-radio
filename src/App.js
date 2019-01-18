@@ -12,8 +12,8 @@ var spotifyApi = new Spotify();
 
 class App extends Component {
 
-  constructor(){
-    super();
+  constructor(props){
+    super(props);
     const params = this.getHashParams();
     const token = params.access_token;
     if (token) {
@@ -21,23 +21,21 @@ class App extends Component {
     }
     this.state = {
       loggedIn: token ? true : false,
-      makerPlaylist: {
-        response: false,
-        tracks: {},
-        nowPlaying: {
-          artist: '',
-          albumArt: ''
-        }
-      },
+      error: "",
+      deviceId: "",
       nowPlaying: {
-        response: false, 
+        playBackResponse: false, 
         artist: '', 
-        albumArt: ''
+        albumArt: '',
+        albumName: '',
+        playing: false,
+        position: 0,
+        duration: 0,
       },
       user: {
-        response: false,
+        meResponse: false,
         name: '',
-        image: ''
+        image: '',
       }
     }
   }
@@ -58,12 +56,26 @@ class App extends Component {
     return hashParams;
   }
 
+  checkForPlayer() {
+    if (window.Spotify !== null) {
+      alert('You got a playa!')
+      this.player = new window.Spotify.Player({
+        name: "Matt's Spotify Player",
+        getOAuthToken: cb => { cb(this.state.token); },
+      });
+      // this.createEventHandlers();
+  
+      // finally, connect!
+      this.player.connect();
+    }
+  }
+
   getNowPlaying(){
     spotifyApi.getMyCurrentPlaybackState()
       .then((response) => {
         this.setState({
           nowPlaying: { 
-              response: true,
+              playBackResponse: true,
               artist: response.item.name, 
               albumArt: response.item.album.images[0].url
             }
@@ -76,7 +88,7 @@ class App extends Component {
       .then((response) => {
         this.setState({
           user: {
-            response: true,
+            meResponse: true,
             name: response.display_name,
             image: response.images[0].url
           }
@@ -84,37 +96,37 @@ class App extends Component {
       })
   }
 
-  getMakerRadioPlaylist(){
-    spotifyApi.getPlaylist(process.env.MAKER_PLAYLIST)
-      .then((response) => {
-        console.log(response)
-        console.log(response.tracks.items[0].track.name)
-        console.log(response.tracks.items[0].track.album.images[0].url)
+  // getMakerRadioPlaylist(){
+  //   spotifyApi.getPlaylist('1PCdCzRKLLmd8XvVLw8eV7')
+  //     .then((response) => {
+  //       console.log(response)
+  //       console.log(response.tracks.items[0].track.name)
+  //       console.log(response.tracks.items[0].track.album.images[0].url)
 
-        this.setState({
-          makerPlaylist: {
-            response: true,
-            tracks: response.tracks,
-            nowPlaying: {
-              artist: response.tracks.items[0].track.name,
-              albumArt: response.tracks.items[0].track.album.images[0].url,
-              trackID: response.tracks.items[0].track.id
-            }
-          }
-        });
-      })
-  }
+  //       this.setState({
+  //         makerPlaylist: {
+  //           response: true,
+  //           tracks: response.tracks,
+  //           nowPlaying: {
+  //             artist: response.tracks.items[0].track.name,
+  //             albumArt: response.tracks.items[0].track.album.images[0].url,
+  //             trackID: response.tracks.items[0].track.id
+  //           }
+  //         }
+  //       });
+  //     })
+  // }
 
   render() {
     return (
       <div 
         className="App">
-
-          {this.state.loggedIn && this.state.nowPlaying.response === false ? this.getNowPlaying() : null }
-          {this.state.loggedIn && this.state.user.response === false ? this.getUserProfile() : null }
-          {this.state.makerPlaylist.response === false ? this.getMakerRadioPlaylist() : null }
+          {this.state.error && <p>Error: {this.state.error}</p>}
           
-          {this.state.nowPlaying.response === true ?
+          {this.state.loggedIn && this.state.nowPlaying.playBackResponse === false ? this.getNowPlaying() : null }
+          {this.state.loggedIn && this.state.user.meResponse === false ? this.getUserProfile() : null }
+          
+          {this.state.nowPlaying.playBackResponse === true ?
           <Palette image={this.state.nowPlaying.albumArt}>
             {palette => (
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', alignContent: 'center', backgroundImage: 'linear-gradient(' + palette.lightVibrant + ', #FFF )', height: '100vh' }}>
