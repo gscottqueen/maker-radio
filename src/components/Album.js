@@ -5,19 +5,14 @@ import styled from 'styled-components'
 import Palette from 'react-palette'
 
 // our styles
-const AlbumBlockWrapper = styled.ul`
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  align-content: flex-start;
+const AlbumBlockWrapper = styled.li`
   width: 100%;
   height: auto;
-  padding: 5px;
+  padding: 50px;
   background-image: linear-gradient( ${props => props.palette.lightVibrant}, #FFF );
-  list-style: none;
 `;
 
-const AlbumBlock = styled.li`
+const AlbumBlock = styled.div`
   margin: 5px auto;
 `;
 
@@ -25,6 +20,7 @@ const AlbumImage = styled.img`
   margin: 5px auto;
   width: ${props => props.width};
   height: ${props => props.height};
+  max-height: 600px;
 `;
 
 const AlbumTitleBlock = styled.div`

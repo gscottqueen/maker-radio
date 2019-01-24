@@ -163,7 +163,7 @@ class App extends Component {
 
     if (this.state.albumsResponse) {
       albums = (
-        <div>
+        <ul style={{display: 'flex', margin: '0', padding: '0', listStyle: 'none'}}>
           {this.state.albumsResponse.map((item) => {
             return  <Album
               image={item.track.album.images[0].url}
@@ -172,7 +172,7 @@ class App extends Component {
               albumName={item.track.name}
               artistName={item.track.album.name}/>
           })}
-        </div>
+        </ul>
       );
     }
     
