@@ -5,7 +5,7 @@ import styled from 'styled-components'
 import Palette from 'react-palette'
 
 // our styles
-const AlbumBlockWrapper = styled.div`
+const AlbumBlockWrapper = styled.ul`
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -14,16 +14,17 @@ const AlbumBlockWrapper = styled.div`
   height: auto;
   padding: 5px;
   background-image: linear-gradient( ${props => props.palette.lightVibrant}, #FFF );
+  list-style: none;
 `;
 
-const AlbumBlock = styled.div`
+const AlbumBlock = styled.li`
   margin: 5px auto;
 `;
 
 const AlbumImage = styled.img`
   margin: 5px auto;
   width: ${props => props.width};
-  width: ${props => props.height};
+  height: ${props => props.height};
 `;
 
 const AlbumTitleBlock = styled.div`

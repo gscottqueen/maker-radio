@@ -18,13 +18,16 @@ class App extends Component {
       spotifyApi.setAccessToken(token);
 
       // check every second for the sdk player.
-      this.playerCheckInterval = setInterval(() => this.checkForPlayer(), 1000);
+      this.playerCheckInterval = setInterval(() => this.checkForPlayer(), 1000)
+      // get our playlist
+      this.getMakerRadioPlaylist();
     }
     this.state = {
       loggedIn: token ? true : false,
       token: token,
       error: '',
       deviceId: '',
+      albumsResponse: [],
       nowPlaying: { 
         artist: '', 
         albumArt: {
@@ -43,7 +46,6 @@ class App extends Component {
         image: '',
       }
     }
-    this.playerCheckInterval = null;
   }
   /**
    * Obtains parameters from the hash of the URL
@@ -71,7 +73,6 @@ class App extends Component {
         getOAuthToken: cb => { cb(this.state.token); },
       });
       this.createEventHandlers();
-  
       // finally, connect!
       this.player.connect();
       // cacel the interval
@@ -94,10 +95,9 @@ class App extends Component {
   
     // Ready
     this.player.on('ready', data => {
-      let { device_id } = data;
-      this.getMakerRadioPlaylist()
+      let { device_id } = data
+      this.setState({ deviceId: device_id })
       console.log("Let the music play on!")
-      this.setState({ deviceId: device_id });
     });
   }
 
@@ -150,24 +150,8 @@ class App extends Component {
     spotifyApi.getPlaylist(
       String(process.env.REACT_APP_MAKER_PLAYLIST))
       .then((response) => {
-        console.log(response)
-
-        this.setState({
-            nowPlaying: {
-              trackID: response.tracks.items[0].track.id,
-              artistName: response.tracks.items[0].track.artists[0].name,
-              albumArt: {
-                image: response.tracks.items[0].track.album.images[0].url,
-                width: response.tracks.items[0].track.album.images[0].width,
-                height: response.tracks.items[0].track.album.images[0].height,
-              }, 
-              trackName: response.tracks.items[0].track.name,
-              albumName: response.tracks.items[0].track.album.name,
-              // playing: playing,
-              // position: position,
-              // duration: duration,
-            }
-        });
+        // console.log(response)
+        this.setState({ albumsResponse: response.tracks.items })
       })
   }
 
@@ -175,19 +159,22 @@ class App extends Component {
 
     let albums = null;
 
-    if (this.state.user.response) {
+    console.log(this.state.albumsResponse)
+
+    if (this.state.albumsResponse) {
       albums = (
         <div>
-          <Album
-            image={this.state.nowPlaying.albumArt.image}
-            imageWidth={this.state.nowPlaying.albumArt.width}
-            imageHeight={this.state.nowPlaying.albumArt.height}
-            albumName={this.state.nowPlaying.albumName}
-            artistName={this.state.nowPlaying.artistName}/>
+          {this.state.albumsResponse.map((item) => {
+            return  <Album
+              image={item.track.album.images[0].url}
+              imageWidth={item.track.album.images[0].width}
+              imageHeight={item.track.album.images[0].height}
+              albumName={item.track.name}
+              artistName={item.track.album.name}/>
+          })}
         </div>
       );
     }
-
     
     return (
       <div className="App">
