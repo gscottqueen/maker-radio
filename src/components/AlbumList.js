@@ -2,19 +2,17 @@ import React from 'react';
 import styled from 'styled-components'
 import Album from './Album'
 
-const AlbumListWrapper = styled.li`
+const AlbumListWrapper = styled.ul`
   display: flex; 
   margin: 0;
-  padding: 0; 
-  list-style: none; 
-  overflow: none;
+  padding: 0;
+  height: 100vh;
+  list-style: none;
 `;
 
 const AlbumList = (props) => {
 
   let albums = null;
-
-  console.log(props.albumsResponse)
 
   if (props.albumsResponse) {
     albums = (

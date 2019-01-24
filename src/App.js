@@ -3,7 +3,7 @@ import React, { Component } from 'react';
 // Components
 import SpotifyButton from './components/SpotifyButton';
 import AlbumList from './components/AlbumList';
-// import Album from './components/Album';
+import NowPlaying from './components/NowPlaying';
 
 // Spotify wrapper library
 var Spotify = require('spotify-web-api-js');
@@ -22,6 +22,7 @@ class App extends Component {
       this.playerCheckInterval = setInterval(() => this.checkForPlayer(), 1000)
       // get our playlist
       this.getMakerRadioPlaylist();
+      this.getNowPlaying();
     }
     this.state = {
       loggedIn: token ? true : false,
@@ -29,17 +30,10 @@ class App extends Component {
       error: '',
       deviceId: '',
       albumsResponse: [],
-      nowPlaying: { 
-        artist: '', 
-        albumArt: {
-          image: '',
-          width: '',
-          height: '',
-        }, 
+      nowPlayingResponse: {
+        imgSrc: '',
         albumName: '',
-        playing: false,
-        position: 0,
-        duration: 0,
+        artistName: '',
       },
       user: {
         response: false,
@@ -156,34 +150,64 @@ class App extends Component {
       })
   }
 
+  getNowPlaying(){
+    spotifyApi.getMyCurrentPlaybackState()
+      .then((response) => {
+        console.log(response)
+        this.setState({
+          nowPlayingResponse: {
+            imgSrc: response.item.album.images[0].url,
+            albumName: response.item.album.name,
+            artistName: response.item.album.artists[0].name,
+          }
+        });
+      })
+  }
+
   render() {
-
-    // let albums = null;
-
-    // console.log(this.state.albumsResponse)
-
-    // if (this.state.albumsResponse) {
-    //   albums = (
-    //     <ul style={{display: 'flex', margin: '0', padding: '0', listStyle: 'none', overflow: 'none'}}>
-    //       {this.state.albumsResponse.map((item) => {
-    //         return  <Album
-    //           image={item.track.album.images[0].url}
-    //           imageWidth={item.track.album.images[0].width}
-    //           imageHeight={item.track.album.images[0].height}
-    //           albumName={item.track.name}
-    //           artistName={item.track.album.name}/>
-    //       })}
-    //     </ul>
-    //   );
-    // }
     
     return (
       <div className="App">
           {this.state.loggedIn && this.state.user.response === false ? this.getUserProfile() : null }
-          {/* {albums} */}
+        <div style={{ display: 'flex', overflow: 'hidden' }}>
+          <NowPlaying
+            imgSrc={this.state.nowPlayingResponse.imgSrc}
+            albumName={this.state.nowPlayingResponse.albumName}
+            artistName={this.state.nowPlayingResponse.artistName}/>
           <AlbumList albumsResponse={this.state.albumsResponse}/>
-          <div style={{ position : 'absolute', right: '20px', bottom: '20px' }}>
+        </div>
+        <div style={{ position : 'absolute', right: '20px', bottom: '20px' }}>
             <SpotifyButton profileImage={this.state.user.image}></SpotifyButton>
+        </div>
+        <div 
+          style={{ 
+            position : 'absolute', 
+            right: '100px', 
+            bottom: '40px',
+            display: 'flex',
+            justifyContent: 'space-around',
+            alignItems: 'flex-start',
+            alignContent: 'space-between'
+            }}>
+            <div
+              style={{
+                // width: '200px',
+                minHeight: '40px',
+                borderRadius: '10px',
+                padding: '5px',
+                backgroundColor: '#f3f2f2'
+              }}>
+              <div
+                style={{
+                  fontSize: '15px',
+                  margin: '5px 10px 2.5px 10px',
+                }}>Next Podcast</div>
+              <div
+                style={{
+                  fontSize: '25px',
+                  margin: '2.5px 10px 5px 10px',
+                }}>Podcast Title</div>
+            </div>
         </div>
       </div>
     );

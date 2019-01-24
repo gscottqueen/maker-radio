@@ -5,10 +5,16 @@ import styled from 'styled-components'
 import Palette from 'react-palette'
 
 // our styles
-const AlbumBlockWrapper = styled.li`
-  padding: 50px 0;
+const AlbumBlockWrapper = styled.div`
+  padding: 75px 100px 0px;
   background-image: linear-gradient( ${props => props.palette.lightVibrant}, #FFF );
-  min-width: 5vw;
+  min-width: 45vw;
+`;
+
+const AlbumBlockTitle = styled.h1`
+  position: absolute;
+  top: 0;
+  color: ${props => props.palette.muted};
 `;
 
 const AlbumBlock = styled.div`
@@ -40,17 +46,16 @@ const ArtistName = styled.div`
   font-size: .75em;
 `;
 
-const Album = (props) => {
+const NowPlaying = (props) => {
     return (
-      <Palette image={props.image}>
+      <Palette image={props.imgSrc}>
       {palette => (
-        <AlbumBlockWrapper palette={palette} >
+        <AlbumBlockWrapper palette={palette}>
+        <AlbumBlockTitle palette={palette}>Now Playing</AlbumBlockTitle>
         <AlbumBlock>
-          {props.image && 
+          {props.imgSrc && 
             <AlbumImage
-              src={props.image} 
-              width={props.imageWidth}
-              height={props.imageHeight}
+              src={props.imgSrc} 
               alt="album cover"/>
           }
           {props.albumName && 
@@ -66,4 +71,4 @@ const Album = (props) => {
     )
 };
 
-export default Album;
+export default NowPlaying;
