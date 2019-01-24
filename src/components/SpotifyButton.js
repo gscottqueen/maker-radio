@@ -34,7 +34,6 @@ const SpotifyLogo = styled.img`
 const UserProfileImage = styled.img`
   width: 35px;
   height: 35px;
-  margin: 0 5px;
   margin: 7px 5px 5px;
   border-radius: 50px;
   border: 4px solid #1aa34a;
