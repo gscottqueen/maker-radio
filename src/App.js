@@ -2,7 +2,8 @@ import React, { Component } from 'react';
 
 // Components
 import SpotifyButton from './components/SpotifyButton';
-import Album from './components/Album';
+import AlbumList from './components/AlbumList';
+// import Album from './components/Album';
 
 // Spotify wrapper library
 var Spotify = require('spotify-web-api-js');
@@ -157,29 +158,30 @@ class App extends Component {
 
   render() {
 
-    let albums = null;
+    // let albums = null;
 
-    console.log(this.state.albumsResponse)
+    // console.log(this.state.albumsResponse)
 
-    if (this.state.albumsResponse) {
-      albums = (
-        <ul style={{display: 'flex', margin: '0', padding: '0', listStyle: 'none'}}>
-          {this.state.albumsResponse.map((item) => {
-            return  <Album
-              image={item.track.album.images[0].url}
-              imageWidth={item.track.album.images[0].width}
-              imageHeight={item.track.album.images[0].height}
-              albumName={item.track.name}
-              artistName={item.track.album.name}/>
-          })}
-        </ul>
-      );
-    }
+    // if (this.state.albumsResponse) {
+    //   albums = (
+    //     <ul style={{display: 'flex', margin: '0', padding: '0', listStyle: 'none', overflow: 'none'}}>
+    //       {this.state.albumsResponse.map((item) => {
+    //         return  <Album
+    //           image={item.track.album.images[0].url}
+    //           imageWidth={item.track.album.images[0].width}
+    //           imageHeight={item.track.album.images[0].height}
+    //           albumName={item.track.name}
+    //           artistName={item.track.album.name}/>
+    //       })}
+    //     </ul>
+    //   );
+    // }
     
     return (
       <div className="App">
           {this.state.loggedIn && this.state.user.response === false ? this.getUserProfile() : null }
-          {albums}
+          {/* {albums} */}
+          <AlbumList albumsResponse={this.state.albumsResponse}/>
           <div style={{ position : 'absolute', right: '20px', bottom: '20px' }}>
             <SpotifyButton profileImage={this.state.user.image}></SpotifyButton>
         </div>
