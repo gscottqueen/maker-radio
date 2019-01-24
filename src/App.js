@@ -1,10 +1,8 @@
 import React, { Component } from 'react';
 
-// Styles
+// Components
 import SpotifyButton from './components/SpotifyButton';
-
-// module for color getter
-import Palette from 'react-palette'
+import Album from './components/Album';
 
 // Spotify wrapper library
 var Spotify = require('spotify-web-api-js');
@@ -91,8 +89,8 @@ class App extends Component {
     this.player.on('playback_error', e => { console.error(e); });
   
     // Playback status updates
-    this.player.on('player_state_changed', state => { console.log(state); });
-    this.player.on('player_state_changed', state => this.onStateChanged(state));
+    // this.player.on('player_state_changed', state => { console.log(state); });
+    // this.player.on('player_state_changed', state => this.onStateChanged(state));
   
     // Ready
     this.player.on('ready', data => {
@@ -103,37 +101,37 @@ class App extends Component {
     });
   }
 
-  onStateChanged(state) {
-    // if we're no longer listening to music, we'll get a null state.
-    if (state !== null) {
-      const {
-        current_track: currentTrack,
-        position,
-        duration,
-      } = state.track_window;
-      const artistName = currentTrack.artists
-        .map(artist => artist.name)
-        .join(", ");
-      const trackName = currentTrack.name;
-      const albumName = currentTrack.album.name;
-      const image = currentTrack.album.images[2].url
-      const playing = !state.paused;
-      this.setState({
-        nowPlaying: { 
-          artistName: artistName, 
-          trackName: trackName,
-          albumName: albumName,
-          // albumArt: albumArt,
-          albumArt: {
-            image: image,
-          }, 
-          playing: playing,
-          position: position,
-          duration: duration,
-        }
-      });
-    }
-  }
+  // onStateChanged(state) {
+  //   // if we're no longer listening to music, we'll get a null state.
+  //   if (state !== null) {
+  //     const {
+  //       current_track: currentTrack,
+  //       position,
+  //       duration,
+  //     } = state.track_window;
+  //     const artistName = currentTrack.artists
+  //       .map(artist => artist.name)
+  //       .join(", ");
+  //     const trackName = currentTrack.name;
+  //     const albumName = currentTrack.album.name;
+  //     const image = currentTrack.album.images[2].url
+  //     const playing = !state.paused;
+  //     this.setState({
+  //       nowPlaying: { 
+  //         artistName: artistName, 
+  //         trackName: trackName,
+  //         albumName: albumName,
+  //         // albumArt: albumArt,
+  //         albumArt: {
+  //           image: image,
+  //         }, 
+  //         playing: playing,
+  //         position: position,
+  //         duration: duration,
+  //       }
+  //     });
+  //   }
+  // }
 
   getUserProfile(){
     spotifyApi.getMe()
@@ -174,28 +172,27 @@ class App extends Component {
   }
 
   render() {
-    return (
-      <div 
-        className="App">
-          {this.state.error && <p>Error: {this.state.error}</p>}
 
+    let albums = null;
+
+    if (this.state.user.response) {
+      albums = (
+        <div>
+          <Album
+            image={this.state.nowPlaying.albumArt.image}
+            imageWidth={this.state.nowPlaying.albumArt.width}
+            imageHeight={this.state.nowPlaying.albumArt.height}
+            albumName={this.state.nowPlaying.albumName}
+            artistName={this.state.nowPlaying.artistName}/>
+        </div>
+      );
+    }
+
+    
+    return (
+      <div className="App">
           {this.state.loggedIn && this.state.user.response === false ? this.getUserProfile() : null }
-          
-          <Palette image={this.state.nowPlaying.albumArt.image}>
-            {palette => (
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', alignContent: 'center', backgroundImage: 'linear-gradient(' + palette.lightVibrant + ', #FFF )', height: '100vh' }}>
-              <h1>{this.state.nowPlaying.albumName}</h1>
-              {this.state.nowPlaying.albumArt.image && 
-                <img 
-                  src={this.state.nowPlaying.albumArt.image} 
-                  width={this.state.nowPlaying.albumArt.width}
-                  height={this.state.nowPlaying.albumArt.height}
-                  style={{ height: this.props.height, width: this.props.width }} alt="album cover"/>
-              }
-              <p style={{ textAlign: 'center' }}>{this.state.nowPlaying.artistName}</p>
-            </div>
-            )}
-            </Palette>
+          {albums}
           <div style={{ position : 'absolute', right: '20px', bottom: '20px' }}>
             <SpotifyButton profileImage={this.state.user.image}></SpotifyButton>
         </div>
