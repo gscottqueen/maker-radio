@@ -17,7 +17,6 @@ class App extends Component {
     const token = params.access_token;    
     if (token) {
       spotifyApi.setAccessToken(token);
-
       // check every second for the sdk player.
       this.playerCheckInterval = setInterval(() => this.checkForPlayer(), 1000)
       // get our playlist
@@ -61,7 +60,6 @@ class App extends Component {
 
   // This works pretty much identically to how the documentation recommends setting things up, but instead of using a constant OAuth token, we’re taking it from our app component’s state, and instead of creating a global variable called player, we just add player as one of the app’s class variables. This means that we can access it from any of the other class methods. (https://mbell.me/blog/2017-12-29-react-spotify-playback-api/)
   checkForPlayer() {
-    // alert('you gotta playa')
     if (window.Spotify !== null) {
       this.player = new window.Spotify.Player({
         name: "Maker's Spotify Player",
@@ -70,7 +68,7 @@ class App extends Component {
       this.createEventHandlers();
       // finally, connect!
       this.player.connect();
-      // cacel the interval
+      // cancel the interval
       clearInterval(this.playerCheckInterval);
     }
   }
@@ -85,13 +83,14 @@ class App extends Component {
     this.player.on('playback_error', e => { console.error(e); });
   
     // Playback status updates
-    // this.player.on('player_state_changed', state => { console.log(state); });
-    // this.player.on('player_state_changed', state => this.onStateChanged(state));
+    this.player.on('player_state_changed', state => { console.log(state); });
+    // this.player.on('player_state_changed', this.getNowPlaying());
   
     // Ready
     this.player.on('ready', data => {
       let { device_id } = data
       this.setState({ deviceId: device_id })
+      this.playRadio(device_id)
       console.log("Let the music play on!")
     });
   }
@@ -127,6 +126,29 @@ class App extends Component {
   //     });
   //   }
   // }
+
+  playRadio(deviceID){
+      fetch('https://api.spotify.com/v1/me/player/play?device_id=' + deviceID + '', {
+        method: 'PUT',
+        body: JSON.stringify({ 
+          uri: process.env.REACT_APP_MAKER_PLAYLIST,
+          offset: { "position": 5 }
+        }),
+        headers: {
+          'Content-Type': 'application/json',
+          "Authorization": 'Bearer ' + this.state.token + ''
+        }
+      }).then(
+        // this.player.setVolume(0.5).then(() => {
+        //   console.log('Volume updated!');
+        // })
+        this.player.togglePlay().then(() => {
+          console.log('Toggled playback!');
+        })
+      )
+    }
+
+  // curl -X "PUT" "https://api.spotify.com/v1/me/player/play" --data "{\"context_uri\":\"spotify:album:5ht7ItJgpBH7W6vJ5BqpPr\",\"offset\":{\"position\":5},\"position_ms\":0}" -H "Accept: application/json" -H "Content-Type: application/json" -H "Authorization: Bearer "
 
   getUserProfile(){
     spotifyApi.getMe()
