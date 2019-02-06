@@ -19,9 +19,8 @@ class App extends Component {
       spotifyApi.setAccessToken(token);
       // check every second for the sdk player.
       this.playerCheckInterval = setInterval(() => this.checkForPlayer(), 1000)
-      // get our playlist
-      this.getMakerRadioPlaylist();
-      this.getNowPlaying();
+      // check every second for the user playing.
+      this.nowPlayingCheckInterval = setInterval(() => this.getNowPlaying(), 1000)
     }
     this.state = {
       loggedIn: token ? true : false,
@@ -29,7 +28,10 @@ class App extends Component {
       error: '',
       deviceId: '',
       albumsResponse: [],
+      makerPlaylist: '',
       nowPlayingResponse: {
+        response: false,
+        offsetPosition: 0,
         imgSrc: '',
         albumName: '',
         artistName: '',
@@ -41,11 +43,18 @@ class App extends Component {
       }
     }
   }
-  /**
-   * Obtains parameters from the hash of the URL
-   * @return Object
-   */
-  // from tutorial, need to understand more what is happening here
+
+  componentWillMount(){
+     // pick a random list from our avalible playlists array
+    const publicLists = ['0RClNbul65Q9fN3n7dDsk2', '4gY2Kfwh9cKCW5gkGmADMQ', '1PCdCzRKLLmd8XvVLw8eV7', '37i9dQZF1DXa2SPUyWl8Y5', '1fX5wTaNu6ogWxu66tjN7t']
+    const list = publicLists[Math.floor(Math.random() * publicLists.length)]
+
+    this.setState({ 
+      makerPlaylist: list,
+     })
+  }
+
+  // Obtains our parameters from the hash of the URL @return Object
   getHashParams(){
     var hashParams = {};
     var e, r = /([^&;=]+)=?([^&;]*)/g,
@@ -58,6 +67,19 @@ class App extends Component {
     return hashParams;
   }
 
+  getUserProfile(){
+    spotifyApi.getMe()
+      .then((response) => {
+        this.setState({
+          user: {
+            response: true,
+            name: response.display_name,
+            image: response.images[0].url
+          }
+        });
+      })
+  }
+
   // This works pretty much identically to how the documentation recommends setting things up, but instead of using a constant OAuth token, we’re taking it from our app component’s state, and instead of creating a global variable called player, we just add player as one of the app’s class variables. This means that we can access it from any of the other class methods. (https://mbell.me/blog/2017-12-29-react-spotify-playback-api/)
   checkForPlayer() {
     if (window.Spotify !== null) {
@@ -67,9 +89,14 @@ class App extends Component {
       });
       this.createEventHandlers();
       // finally, connect!
-      this.player.connect();
-      // cancel the interval
-      clearInterval(this.playerCheckInterval);
+      this.player.connect().then(success => {
+        if (success) {
+          // since we have the player we can now cancel the interval
+          clearInterval(this.playerCheckInterval);
+          // and get our playlist
+          this.getMakerRadioPlaylist()
+        }
+      })
     }
   }
 
@@ -77,21 +104,26 @@ class App extends Component {
     this.player.on('initialization_error', e => { console.error(e); });
     this.player.on('authentication_error', e => {
       console.error(e);
-      this.setState({ loggedIn: false });
+
+      this.setState({ 
+        loggedIn: false 
+      });
     });
     this.player.on('account_error', e => { console.error(e); });
     this.player.on('playback_error', e => { console.error(e); });
   
     // Playback status updates
-    this.player.on('player_state_changed', state => { console.log(state); });
+    // this.player.on('player_state_changed', state => { console.log(state); });
     // this.player.on('player_state_changed', this.getNowPlaying());
   
     // Ready
     this.player.on('ready', data => {
       let { device_id } = data
-      this.setState({ deviceId: device_id })
       this.playRadio(device_id)
-      console.log("Let the music play on!")
+
+      this.setState({ 
+        deviceId: device_id 
+      })
     });
   }
 
@@ -128,69 +160,63 @@ class App extends Component {
   // }
 
   playRadio(deviceID){
-      fetch('https://api.spotify.com/v1/me/player/play?device_id=' + deviceID + '', {
-        method: 'PUT',
-        body: JSON.stringify({ 
-          uri: process.env.REACT_APP_MAKER_PLAYLIST,
-          offset: { "position": 5 }
-        }),
-        headers: {
-          'Content-Type': 'application/json',
-          "Authorization": 'Bearer ' + this.state.token + ''
-        }
-      }).then(
-        // this.player.setVolume(0.5).then(() => {
-        //   console.log('Volume updated!');
-        // })
-        this.player.togglePlay().then(() => {
-          console.log('Toggled playback!');
-        })
-      )
+      if (this.makerPlaylist !== '') {
+        fetch('https://api.spotify.com/v1/me/player/play?device_id=' + deviceID + '', {
+          method: 'PUT',
+          body: JSON.stringify({
+            "context_uri": 'spotify:playlist:' + this.state.makerPlaylist + '',
+            "offset": {
+              "position": this.state.offsetPosition,
+            },
+            "position_ms": 0,
+          }),
+          headers: {
+            'Content-Type': 'application/json',
+            "Authorization": 'Bearer ' + this.state.token + ''
+          }
+        }).then(
+          this.player.togglePlay().then(() => {
+            this.player.setVolume(0.1)
+          })
+        )
+      }
     }
 
-  // curl -X "PUT" "https://api.spotify.com/v1/me/player/play" --data "{\"context_uri\":\"spotify:album:5ht7ItJgpBH7W6vJ5BqpPr\",\"offset\":{\"position\":5},\"position_ms\":0}" -H "Accept: application/json" -H "Content-Type: application/json" -H "Authorization: Bearer "
-
-  getUserProfile(){
-    spotifyApi.getMe()
-      .then((response) => {
-        this.setState({
-          user: {
-            response: true,
-            name: response.display_name,
-            image: response.images[0].url
-          }
-        });
-      })
-  }
-
   getMakerRadioPlaylist(){
-    spotifyApi.getPlaylist(
-      String(process.env.REACT_APP_MAKER_PLAYLIST))
+    if (this.state.makerPlaylist !== ''){
+      spotifyApi.getPlaylist(this.state.makerPlaylist)
       .then((response) => {
-        // console.log(response)
-        this.setState({ albumsResponse: response.tracks.items })
+        const tracks = response.tracks.items
+        // select a random track to offset
+        const startRandomTrack = Math.floor((Math.random() * tracks.length))
+        
+        this.setState({
+          albumsResponse: tracks,
+          offsetPosition: startRandomTrack,
+        })
       })
+    }
   }
 
   getNowPlaying(){
     spotifyApi.getMyCurrentPlaybackState()
       .then((response) => {
-        console.log(response)
-        this.setState({
-          nowPlayingResponse: {
-            imgSrc: response.item.album.images[0].url,
-            albumName: response.item.album.name,
-            artistName: response.item.album.artists[0].name,
-          }
-        });
+        if (response) {
+          this.setState({
+            nowPlayingResponse: {
+              imgSrc: response.item.album.images[0].url,
+              albumName: response.item.album.name,
+              artistName: response.item.album.artists[0].name,
+            }
+          })
+        }
       })
   }
 
   render() {
-    
     return (
       <div className="App">
-          {this.state.loggedIn && this.state.user.response === false ? this.getUserProfile() : null }
+      {this.state.loggedIn && this.state.user.response === false ? this.getUserProfile() : null }
         <div style={{ display: 'flex', overflow: 'hidden' }}>
           <NowPlaying
             imgSrc={this.state.nowPlayingResponse.imgSrc}
@@ -213,7 +239,6 @@ class App extends Component {
             }}>
             <div
               style={{
-                // width: '200px',
                 minHeight: '40px',
                 borderRadius: '10px',
                 padding: '5px',

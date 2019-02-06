@@ -19,6 +19,7 @@ const AlbumList = (props) => {
       <AlbumListWrapper>
         {props.albumsResponse.map((item) => {
           return  <Album
+            key={item.track.id}
             image={item.track.album.images[0].url}
             imageWidth={item.track.album.images[0].width}
             imageHeight={item.track.album.images[0].height}
