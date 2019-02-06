@@ -35,6 +35,7 @@ class App extends Component {
         imgSrc: '',
         albumName: '',
         artistName: '',
+        albumID: '',
       },
       user: {
         response: false,
@@ -114,50 +115,45 @@ class App extends Component {
   
     // Playback status updates
     // this.player.on('player_state_changed', state => { console.log(state); });
-    // this.player.on('player_state_changed', this.getNowPlaying());
   
     // Ready
     this.player.on('ready', data => {
       let { device_id } = data
       this.playRadio(device_id)
-
+      
       this.setState({ 
-        deviceId: device_id 
+        deviceId: device_id, 
       })
+
     });
+
+    this.player.addListener('player_state_changed', ({
+      track_window: { current_track: {
+        id
+      } }
+    }) => {
+      if (id !== window.localStorage.getItem('Track ID')) {
+        window.localStorage.setItem('Track ID', id)
+        this.shiftPlaylist()
+      }
+    });
+
   }
 
-  // onStateChanged(state) {
-  //   // if we're no longer listening to music, we'll get a null state.
-  //   if (state !== null) {
-  //     const {
-  //       current_track: currentTrack,
-  //       position,
-  //       duration,
-  //     } = state.track_window;
-  //     const artistName = currentTrack.artists
-  //       .map(artist => artist.name)
-  //       .join(", ");
-  //     const trackName = currentTrack.name;
-  //     const albumName = currentTrack.album.name;
-  //     const image = currentTrack.album.images[2].url
-  //     const playing = !state.paused;
-  //     this.setState({
-  //       nowPlaying: { 
-  //         artistName: artistName, 
-  //         trackName: trackName,
-  //         albumName: albumName,
-  //         // albumArt: albumArt,
-  //         albumArt: {
-  //           image: image,
-  //         }, 
-  //         playing: playing,
-  //         position: position,
-  //         duration: duration,
-  //       }
-  //     });
-  //   }
-  // }
+  
+
+  shiftPlaylist(){    
+    // make a copy of our array
+    let albums = [...this.state.albumsResponse]
+    const cutPlaylist = albums.shift(0)
+    // rebuild our albums with the last track played appended to the end
+    const updatedPlaylist = albums.concat(cutPlaylist)
+    console.log(updatedPlaylist)
+    this.setState({
+      albumsResponse: updatedPlaylist,
+    })
+  }
+
 
   playRadio(deviceID){
       if (this.makerPlaylist !== '') {
@@ -188,11 +184,16 @@ class App extends Component {
       .then((response) => {
         const tracks = response.tracks.items
         // select a random track to offset
-        const startRandomTrack = Math.floor((Math.random() * tracks.length))
-        
+        const randomTrack = Math.floor((Math.random() * tracks.length))
+        window.localStorage.setItem('Track ID', tracks[randomTrack].track.id)
+        // remove any index from 0 to our random track
+        let cutPlaylist = tracks.splice(randomTrack + 1)
+        // rebuild our playlist with the random track in the nowPlaying position and its next index in the first index of the playlist
+        const newPlaylist = cutPlaylist.concat(tracks)
+
         this.setState({
-          albumsResponse: tracks,
-          offsetPosition: startRandomTrack,
+          albumsResponse: newPlaylist,
+          offsetPosition: randomTrack,
         })
       })
     }
