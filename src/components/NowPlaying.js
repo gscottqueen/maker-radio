@@ -52,7 +52,8 @@ const NowPlaying = (props) => {
       <Palette image={props.imgSrc}>
       {palette => (
         <AlbumBlockWrapper palette={palette}>
-          <AlbumBlockTitle palette={palette}>Now Playing</AlbumBlockTitle>
+        { props.imgSrc &&
+          <AlbumBlockTitle palette={palette}>Now Playing</AlbumBlockTitle> }
             <AlbumBlock>
               {props.imgSrc && 
                 <AlbumImage

@@ -83,7 +83,7 @@ class App extends Component {
 
   // This works pretty much identically to how the documentation recommends setting things up, but instead of using a constant OAuth token, we’re taking it from our app component’s state, and instead of creating a global variable called player, we just add player as one of the app’s class variables. This means that we can access it from any of the other class methods. (https://mbell.me/blog/2017-12-29-react-spotify-playback-api/)
   checkForPlayer() {
-    if (window.Spotify !== null) {
+    if (window.Spotify) {
       this.player = new window.Spotify.Player({
         name: "Maker's Spotify Player",
         getOAuthToken: cb => { cb(this.state.token); },
@@ -123,7 +123,6 @@ class App extends Component {
     this.player.on('ready', data => {
       let { device_id } = data
       this.playRadio(device_id)
-      // this.getPodcast()
       
       this.setState({ 
         deviceId: device_id, 
@@ -191,19 +190,21 @@ class App extends Component {
     if (this.state.makerPlaylist !== ''){
       spotifyApi.getPlaylist(this.state.makerPlaylist)
       .then((response) => {
-        const tracks = response.tracks.items
-        // select a random track to offset
-        const randomTrack = Math.floor((Math.random() * tracks.length))
-        window.localStorage.setItem('Track ID', tracks[randomTrack].track.id)
-        // remove any index from 0 to our random track
-        let cutPlaylist = tracks.splice(randomTrack + 1)
-        // rebuild our playlist with the random track in the nowPlaying position and its next index in the first index of the playlist
-        const newPlaylist = cutPlaylist.concat(tracks)
-
-        this.setState({
-          albumsResponse: newPlaylist,
-          offsetPosition: randomTrack,
-        })
+        if(response) {
+          const tracks = response.tracks.items
+          // select a random track to offset
+          const randomTrack = Math.floor((Math.random() * tracks.length))
+          window.localStorage.setItem('Track ID', tracks[randomTrack].track.id)
+          // remove any index from 0 to our random track
+          let cutPlaylist = tracks.splice(randomTrack + 1)
+          // rebuild our playlist with the random track in the nowPlaying position and its next index in the first index of the playlist
+          const newPlaylist = cutPlaylist.concat(tracks)
+  
+          this.setState({
+            albumsResponse: newPlaylist,
+            offsetPosition: randomTrack,
+          })
+        }
       })
     }
   }
@@ -237,35 +238,6 @@ class App extends Component {
         </div>
         <div style={{ position : 'absolute', right: '20px', bottom: '20px' }}>
             <SpotifyButton profileImage={this.state.user.image}></SpotifyButton>
-        </div>
-        <div 
-          style={{ 
-            position : 'absolute', 
-            right: '100px', 
-            bottom: '40px',
-            display: 'flex',
-            justifyContent: 'space-around',
-            alignItems: 'flex-start',
-            alignContent: 'space-between'
-            }}>
-            <div
-              style={{
-                minHeight: '40px',
-                borderRadius: '10px',
-                padding: '5px',
-                backgroundColor: '#f3f2f2'
-              }}>
-              <div
-                style={{
-                  fontSize: '15px',
-                  margin: '5px 10px 2.5px 10px',
-                }}>Next Podcast</div>
-              <div
-                style={{
-                  fontSize: '25px',
-                  margin: '2.5px 10px 5px 10px',
-                }}>Podcast Title</div>
-            </div>
         </div>
       </div>
     );
