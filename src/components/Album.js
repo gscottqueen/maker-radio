@@ -1,5 +1,5 @@
 import React from 'react';
-import styled from 'styled-components'
+import styled from 'styled-components';
 
 // module for color getter
 import Palette from 'react-palette'
@@ -45,21 +45,21 @@ const Album = (props) => {
       <Palette image={props.image}>
       {palette => (
         <AlbumBlockWrapper palette={palette} >
-        <AlbumBlock>
-          {props.image && 
-            <AlbumImage
-              src={props.image} 
-              width={props.imageWidth}
-              height={props.imageHeight}
-              alt="album cover"/>
-          }
-          {props.albumName && 
-            <AlbumTitleBlock palette={palette}>
-              <AlbumTitle><strong>{props.albumName}</strong></AlbumTitle>
-              <ArtistName>by {props.artistName}</ArtistName>
-            </AlbumTitleBlock>
+          <AlbumBlock>
+            {props.image && 
+              <AlbumImage
+                src={props.image} 
+                width={props.imageWidth}
+                height={props.imageHeight}
+                alt="album cover"/>
             }
-          </AlbumBlock>
+            {props.albumName && 
+              <AlbumTitleBlock palette={palette}>
+                <AlbumTitle><strong>{props.albumName}</strong></AlbumTitle>
+                <ArtistName>by {props.artistName}</ArtistName>
+              </AlbumTitleBlock>
+              }
+            </AlbumBlock>
         </AlbumBlockWrapper>
       )}
       </Palette>

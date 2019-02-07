@@ -19,7 +19,7 @@ class App extends Component {
       spotifyApi.setAccessToken(token);
       // check every second for the sdk player.
       this.playerCheckInterval = setInterval(() => this.checkForPlayer(), 1000)
-      // check every second for the user playing.
+      // check every second for the user playing. We continue to run this so we can listen to user changes on our webplayer
       this.nowPlayingCheckInterval = setInterval(() => this.getNowPlaying(), 1000)
     }
     this.state = {
@@ -114,33 +114,31 @@ class App extends Component {
     this.player.on('playback_error', e => { console.error(e); });
   
     // Playback status updates
+
+    // state seems to change in an unpredictable pattern, often twice on each change - this seems to be a known issue [in an iframe](https://github.com/spotify/web-playback-sdk/issues/63), [on listener](https://github.com/spotify/web-api/issues/878), etc.  seems to be an issue with the player sdk and not the api. This make it a bit unpredictable on how it is going to update state as a single reliable occurance.
+    
     // this.player.on('player_state_changed', state => { console.log(state); });
   
     // Ready
     this.player.on('ready', data => {
       let { device_id } = data
       this.playRadio(device_id)
+      // this.getPodcast()
       
       this.setState({ 
         deviceId: device_id, 
       })
-
     });
 
     this.player.addListener('player_state_changed', ({
-      track_window: { current_track: {
-        id
-      } }
+      track_window: { current_track: { id } }
     }) => {
       if (id !== window.localStorage.getItem('Track ID')) {
         window.localStorage.setItem('Track ID', id)
         this.shiftPlaylist()
       }
     });
-
   }
-
-  
 
   shiftPlaylist(){    
     // make a copy of our array
@@ -148,12 +146,10 @@ class App extends Component {
     const cutPlaylist = albums.shift(0)
     // rebuild our albums with the last track played appended to the end
     const updatedPlaylist = albums.concat(cutPlaylist)
-    console.log(updatedPlaylist)
     this.setState({
       albumsResponse: updatedPlaylist,
     })
   }
-
 
   playRadio(deviceID){
       if (this.makerPlaylist !== '') {
@@ -177,6 +173,19 @@ class App extends Component {
         )
       }
     }
+  
+  // we can't get podcasts@@api.spotify because bodyUse is set to false... :(
+  //  getPodcast() {
+  //     fetch('https://api.spotify.com/v1/search?type=album%2Cartist%2Cplaylist%2Ctrack%2Cshow_audio%2Cepisode_audio&q=podnews*&decorate_restrictions=false&best_match=true&limit=50&userless=true&market=AU', {
+  //       method: 'GET',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //         "Authorization": 'Bearer ' + this.state.token + ''
+  //       }
+  //     }).then((response) => {
+  //       // console.log(response)
+  //     })
+  //   }
 
   getMakerRadioPlaylist(){
     if (this.state.makerPlaylist !== ''){
@@ -223,7 +232,8 @@ class App extends Component {
             imgSrc={this.state.nowPlayingResponse.imgSrc}
             albumName={this.state.nowPlayingResponse.albumName}
             artistName={this.state.nowPlayingResponse.artistName}/>
-          <AlbumList albumsResponse={this.state.albumsResponse}/>
+          <AlbumList 
+            albumsResponse={this.state.albumsResponse}/>
         </div>
         <div style={{ position : 'absolute', right: '20px', bottom: '20px' }}>
             <SpotifyButton profileImage={this.state.user.image}></SpotifyButton>
