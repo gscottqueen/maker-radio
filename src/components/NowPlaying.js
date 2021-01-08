@@ -26,7 +26,7 @@ const AlbumImage = styled.img`
   margin: 5px auto;
   width: 100%;
   height: auto;
-  max-height: 600px;
+  max-height: 525px;
 `;
 
 const AlbumTitleBlock = styled.div`
@@ -55,12 +55,12 @@ const NowPlaying = (props) => {
         { props.imgSrc &&
           <AlbumBlockTitle palette={palette}>Now Playing</AlbumBlockTitle> }
             <AlbumBlock>
-              {props.imgSrc && 
+              {props.imgSrc &&
                 <AlbumImage
-                  src={props.imgSrc} 
+                  src={props.imgSrc}
                   alt="album cover"/>
               }
-              {props.albumName && 
+              {props.albumName &&
                 <AlbumTitleBlock palette={palette}>
                   <AlbumTitle><strong>{props.albumName}</strong></AlbumTitle>
                   <ArtistName>by {props.artistName}</ArtistName>
