@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 
 // Components
+// import PlayerButton from './components/PlayerButton';
 import SpotifyButton from './components/SpotifyButton';
 import AlbumList from './components/AlbumList';
 import NowPlaying from './components/NowPlaying';
@@ -14,7 +15,7 @@ class App extends Component {
   constructor(props){
     super(props);
     const params = this.getHashParams();
-    const token = params.access_token;    
+    const token = params.access_token;
     if (token) {
       spotifyApi.setAccessToken(token);
       // check every second for the sdk player.
@@ -41,8 +42,15 @@ class App extends Component {
         response: false,
         name: '',
         image: '',
+      },
+      track: {
+        static: false,
+        staticSwitch: "Pause"
       }
     }
+    this.handlePrevTrack = this.handlePrevTrack.bind(this);
+    this.handleTrackStatic = this.handleTrackStatic.bind(this);
+    this.handleNextTrack = this.handleNextTrack.bind(this);
   }
 
   componentWillMount(){
@@ -50,7 +58,7 @@ class App extends Component {
     const publicLists = ['0RClNbul65Q9fN3n7dDsk2', '4gY2Kfwh9cKCW5gkGmADMQ', '1PCdCzRKLLmd8XvVLw8eV7', '37i9dQZF1DXa2SPUyWl8Y5', '1fX5wTaNu6ogWxu66tjN7t']
     const list = publicLists[Math.floor(Math.random() * publicLists.length)]
 
-    this.setState({ 
+    this.setState({
       makerPlaylist: list,
      })
   }
@@ -106,26 +114,26 @@ class App extends Component {
     this.player.on('authentication_error', e => {
       console.error(e);
 
-      this.setState({ 
-        loggedIn: false 
+      this.setState({
+        loggedIn: false
       });
     });
     this.player.on('account_error', e => { console.error(e); });
     this.player.on('playback_error', e => { console.error(e); });
-  
+
     // Playback status updates
 
     // state seems to change in an unpredictable pattern, often twice on each change - this seems to be a known issue [in an iframe](https://github.com/spotify/web-playback-sdk/issues/63), [on listener](https://github.com/spotify/web-api/issues/878), etc.  seems to be an issue with the player sdk and not the api. This make it a bit unpredictable on how it is going to update state as a single reliable occurance.
-    
+
     // this.player.on('player_state_changed', state => { console.log(state); });
-  
+
     // Ready
     this.player.on('ready', data => {
       let { device_id } = data
       this.playRadio(device_id)
-      
-      this.setState({ 
-        deviceId: device_id, 
+
+      this.setState({
+        deviceId: device_id,
       })
     });
 
@@ -139,7 +147,7 @@ class App extends Component {
     });
   }
 
-  shiftPlaylist(){    
+  shiftPlaylist(){
     // make a copy of our array
     let albums = [...this.state.albumsResponse]
     const cutPlaylist = albums.shift(0)
@@ -172,7 +180,7 @@ class App extends Component {
         )
       }
     }
-  
+
   // we can't get podcasts@@api.spotify because bodyUse is set to false... :(
   //  getPodcast() {
   //     fetch('https://api.spotify.com/v1/search?type=album%2Cartist%2Cplaylist%2Ctrack%2Cshow_audio%2Cepisode_audio&q=podnews*&decorate_restrictions=false&best_match=true&limit=50&userless=true&market=AU', {
@@ -199,7 +207,7 @@ class App extends Component {
           let cutPlaylist = tracks.splice(randomTrack + 1)
           // rebuild our playlist with the random track in the nowPlaying position and its next index in the first index of the playlist
           const newPlaylist = cutPlaylist.concat(tracks)
-  
+
           this.setState({
             albumsResponse: newPlaylist,
             offsetPosition: randomTrack,
@@ -224,6 +232,43 @@ class App extends Component {
       })
   }
 
+  handlePrevTrack() {
+    this.player.previousTrack().then(() => {
+      console.log('Skipped to prev track!');
+    });
+  }
+
+  handleTrackStatic() {
+
+    if (this.state.track.static === false) {
+      this.player.pause().then(() => {
+        this.setState({
+          track: {
+            static: !this.state.track.static,
+            staticSwitch: "Play"
+          }
+        })
+        console.log('Paused');
+      });
+    } else {
+      this.player.resume().then(() => {
+        this.setState({
+          track: {
+            static: !this.state.track.static,
+            staticSwitch: "Pause"
+          }
+        })
+        console.log('Playing');
+      });
+    }
+  }
+
+  handleNextTrack() {
+    this.player.nextTrack().then(() => {
+      console.log('Skipped to next track!');
+    });
+  }
+
   render() {
     return (
       <div className="App">
@@ -233,9 +278,75 @@ class App extends Component {
             imgSrc={this.state.nowPlayingResponse.imgSrc}
             albumName={this.state.nowPlayingResponse.albumName}
             artistName={this.state.nowPlayingResponse.artistName}/>
-          <AlbumList 
+          <AlbumList
             albumsResponse={this.state.albumsResponse}/>
         </div>
+        {this.player ?
+          <div style={{ position: 'absolute', left: '40px', bottom: '24px' }}>
+            <button
+              style={{
+                height: '60px',
+                width: '60px',
+                border: 'none',
+                borderRadius: '50px',
+                background: 'linear-gradient(145deg, #e6e6e6b3, #ffffff)',
+                boxShadow: '20px 20px 60px #d9d9d9',
+                margin: '20px 20px 20px 0px',
+                position: 'relative'
+              }}
+              onClick={this.handlePrevTrack}
+            >
+             <div className="arrow-left" style={{
+              width: '0',
+              height: '0',
+              borderTop: '10px solid transparent',
+              borderBottom: '10px solid transparent',
+              borderRight: '18px solid rgba(0,0,0,0.22)',
+              background: 'linear-gradient(135deg, rgba(0,0,0,0.22), rgba(255,255,255,0.25))',
+              position: 'absolute',
+              top: '20px',
+              right: '24px'
+            }}></div>
+            </button>
+            <button
+              style={{
+                height: '60px',
+                width: '60px',
+                border: 'none',
+                borderRadius: '50px',
+                background: 'linear-gradient(145deg, #e6e6e6b3, #ffffff)',
+                boxShadow: '20px 20px 60px #d9d9d9',
+                margin: '20px 20px 20px 0px'
+              }}
+              onClick={this.handleTrackStatic}
+            >{this.state.track.staticSwitch}</button>
+            <button
+              style={{
+                height: '60px',
+                width: '60px',
+                border: 'none',
+                borderRadius: '50px',
+                background: 'linear-gradient(145deg, #e6e6e6b3, #ffffff)',
+                boxShadow: '20px 20px 60px #d9d9d9',
+                margin: '20px 20px 20px 0px',
+                position: 'relative'
+              }}
+              onClick={this.handleNextTrack}
+              aria-label="Next"
+            >
+            <div className="arrow-right" style={{
+              width: '0',
+              height: '0',
+              borderTop: '10px solid transparent',
+              borderBottom: '10px solid transparent',
+              borderLeft: '18px solid rgba(0,0,0,0.22)',
+              background: 'linear-gradient(135deg, rgba(0,0,0,0.22), rgba(255,255,255,0.25))',
+              position: 'absolute',
+              top: '20px',
+              left: '24px'
+            }}></div>
+            </button>
+          </div>: null }
         <div style={{ position : 'absolute', right: '20px', bottom: '20px' }}>
             <SpotifyButton profileImage={this.state.user.image}></SpotifyButton>
         </div>
