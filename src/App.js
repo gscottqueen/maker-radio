@@ -5,6 +5,7 @@ import React, { Component } from 'react';
 import SpotifyButton from './components/SpotifyButton';
 import AlbumList from './components/AlbumList';
 import NowPlaying from './components/NowPlaying';
+import PodcastList from './components/PodcastList';
 
 // Spotify wrapper library
 var Spotify = require('spotify-web-api-js');
@@ -29,7 +30,11 @@ class App extends Component {
       error: '',
       deviceId: '',
       albumsResponse: [],
+      podcastResponse: [],
+      context: '',
       makerPlaylist: '',
+      podcastimage: '',
+      podcastnameame: '',
       nowPlayingResponse: {
         response: false,
         offsetPosition: 0,
@@ -79,11 +84,12 @@ class App extends Component {
   getUserProfile(){
     spotifyApi.getMe()
       .then((response) => {
+        console.log('user', response)
         this.setState({
           user: {
             response: true,
             name: response.display_name,
-            image: response.images[0].url
+            image: response.images[0].url && response.images[0].url
           }
         });
       })
@@ -103,7 +109,10 @@ class App extends Component {
           // since we have the player we can now cancel the interval
           clearInterval(this.playerCheckInterval);
           // and get our playlist
+          // this.getMakerRadioPlaylist()
+          this.getPodcasts()
           this.getMakerRadioPlaylist()
+          console.log('playlist', this.state.makerPlaylist)
         }
       })
     }
@@ -157,13 +166,17 @@ class App extends Component {
       albumsResponse: updatedPlaylist,
     })
   }
-
+// spotify:show:2GM7Lo15uxyqhIv5uXfBpM
   playRadio(deviceID){
+    console.log('deviceID', deviceID)
+    console.log('context', this.state.context)
+    console.log('makerPlaylist', this.state.makerPlaylist)
+    console.log('token', this.state.token)
       if (this.makerPlaylist !== '') {
         fetch('https://api.spotify.com/v1/me/player/play?device_id=' + deviceID + '', {
           method: 'PUT',
           body: JSON.stringify({
-            "context_uri": 'spotify:playlist:' + this.state.makerPlaylist + '',
+            "context_uri": 'spotify:show:2GM7Lo15uxyqhIv5uXfBpM',
             "offset": {
               "position": this.state.offsetPosition,
             },
@@ -181,28 +194,62 @@ class App extends Component {
       }
     }
 
-  // we can't get podcasts@@api.spotify because bodyUse is set to false... :(
-  //  getPodcast() {
-  //     fetch('https://api.spotify.com/v1/search?type=album%2Cartist%2Cplaylist%2Ctrack%2Cshow_audio%2Cepisode_audio&q=podnews*&decorate_restrictions=false&best_match=true&limit=50&userless=true&market=AU', {
-  //       method: 'GET',
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //         "Authorization": 'Bearer ' + this.state.token + ''
-  //       }
-  //     }).then((response) => {
-  //       // console.log(response)
-  //     })
-  //   }
+      // playPodcast(deviceID){
+      //   if (this.makerPlaylist !== '') {
+      //     fetch('https://api.spotify.com/v1/me/player/play?device_id=' + deviceID + '', {
+      //       method: 'PUT',
+      //       body: JSON.stringify({
+      //         "context_uri": 'spotify:playlist:' + this.state.makerPlaylist + '',
+      //         "offset": {
+      //           "position": this.state.offsetPosition,
+      //         },
+      //         "position_ms": 0,
+      //       }),
+      //       headers: {
+      //         'Content-Type': 'application/json',
+      //         "Authorization": 'Bearer ' + this.state.token + ''
+      //       }
+      //     }).then(
+      //       this.player.togglePlay().then(() => {
+      //         this.player.setVolume(0.1)
+      //       })
+      //     )
+      //   }
+      // }
+
+   getPodcasts() {
+      fetch('https://api.spotify.com/v1/shows/2GM7Lo15uxyqhIv5uXfBpM/episodes', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          "Authorization": 'Bearer ' + this.state.token + ''
+        }
+      }).then(response => response.json())
+        .then(data => {
+          console.log(data)
+           this.setState({
+            podcastResponse: data.items,
+            makerPlaylist: data.items,
+            podcastimage: data.items[0].images[0].url,
+            podcastname: data.items[0].name,
+            podcastdescription: data.items[0].description,
+            context: 'show'
+          })
+        })
+    }
 
   getMakerRadioPlaylist(){
+    console.log('fired')
     if (this.state.makerPlaylist !== ''){
       spotifyApi.getPlaylist(this.state.makerPlaylist)
       .then((response) => {
         if(response) {
-          const tracks = response.tracks.items
+          const tracks = response.tracks.items || response.items
           // select a random track to offset
-          const randomTrack = Math.floor((Math.random() * tracks.length))
-          window.localStorage.setItem('Track ID', tracks[randomTrack].track.id)
+          const length = tracks.length
+          const randomTrack = Math.floor((Math.random() * length))
+          const id = tracks[randomTrack].track.id || tracks[randomTrack].id
+          window.localStorage.setItem('Track ID', id)
           // remove any index from 0 to our random track
           let cutPlaylist = tracks.splice(randomTrack + 1)
           // rebuild our playlist with the random track in the nowPlaying position and its next index in the first index of the playlist
@@ -211,21 +258,72 @@ class App extends Component {
           this.setState({
             albumsResponse: newPlaylist,
             offsetPosition: randomTrack,
+            context: 'playlist'
           })
         }
       })
     }
   }
 
+  // getPodcast(){
+  //   if (this.state.makerPlaylist !== ''){
+  //     spotifyApi.getPodcastPlaylist(this.state.makerPlaylist)
+  //     .then((response) => {
+  //       if(response) {
+  //         const tracks = response.tracks.items || response.items
+  //         // select a random track to offset
+  //         const length = tracks.length
+  //         const randomTrack = Math.floor((Math.random() * length))
+  //         const id = tracks[randomTrack].track.id || tracks[randomTrack].id
+  //         window.localStorage.setItem('Track ID', id)
+  //         // remove any index from 0 to our random track
+  //         let cutPlaylist = tracks.splice(randomTrack + 1)
+  //         // rebuild our playlist with the random track in the nowPlaying position and its next index in the first index of the playlist
+  //         const newPlaylist = cutPlaylist.concat(tracks)
+
+  //         this.setState({
+  //           albumsResponse: newPlaylist,
+  //           offsetPosition: randomTrack,
+  //           context: 'show'
+  //         })
+  //       }
+  //     })
+  //   }
+  // }
+
+     getPlayingContent() {
+      fetch('https://api.spotify.com/v1/me/player/currently-playing', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          "Authorization": 'Bearer ' + this.state.token + ''
+        }
+      }).then(response => response.json())
+        .then(data => {
+          console.log(data)
+           this.setState({
+            // podcastResponse: data.items,
+            // makerPlaylist: data.items,
+            // podcastimage: data.items[0].images[0].url,
+            // podcastname: data.items[0].name,
+            // podcastdescription: data.items[0].description,
+            // context: 'show'
+          })
+        })
+    }
+
   getNowPlaying(){
     spotifyApi.getMyCurrentPlaybackState()
       .then((response) => {
-        if (response) {
+        console.log("nowplaying", response)
+        console.log(this.state.podcastimage)
+        console.log(this.state.podcastname)
+        if (response && this.state.podcastimage && this.state.podcastname) {
           this.setState({
             nowPlayingResponse: {
-              imgSrc: response.item.album.images[0].url,
-              albumName: response.item.album.name,
-              artistName: response.item.album.artists[0].name,
+              imgSrc: this.state.podcastimage,
+              albumName: this.state.podcastname,
+              artistName: this.state.podcastdescription,
             }
           })
         }
@@ -239,7 +337,6 @@ class App extends Component {
   }
 
   handleTrackStatic() {
-
     if (this.state.track.static === false) {
       this.player.pause().then(() => {
         this.setState({
@@ -273,13 +370,13 @@ class App extends Component {
     return (
       <div className="App">
       {this.state.loggedIn && this.state.user.response === false ? this.getUserProfile() : null }
-        <div style={{ display: 'flex', overflow: 'hidden' }}>
+        <div>
           <NowPlaying
             imgSrc={this.state.nowPlayingResponse.imgSrc}
             albumName={this.state.nowPlayingResponse.albumName}
             artistName={this.state.nowPlayingResponse.artistName}/>
-          <AlbumList
-            albumsResponse={this.state.albumsResponse}/>
+          {/* <PodcastList
+            podcastResponse={this.state.podcastResponse}/> */}
         </div>
         {this.player ?
           <div style={{ position: 'absolute', left: '40px', bottom: '24px' }}>
@@ -343,7 +440,7 @@ class App extends Component {
               background: 'linear-gradient(135deg, rgba(0,0,0,0.22), rgba(255,255,255,0.25))',
               position: 'absolute',
               top: '20px',
-              left: '24px'
+              left: '24px',
             }}></div>
             </button>
           </div>: null }
