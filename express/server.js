@@ -20,7 +20,7 @@ var client_secret = process.env.CLIENT_SECRET;
 var redirect_uri = process.env.REACT_APP_AUTH_DOMAIN + process.env.REDIRECT_URI;
 var callback_uri = process.env.REACT_APP_APP_DOMAIN
 var build_index = process.env.BUILD_INDEX
-const router = express.Router();
+
 const path = require('path');
 
 console.log(client_id);
@@ -49,11 +49,10 @@ var app = express();
 app.use(cors())
    .use(cookieParser());
 
-// app.use(express.static(__dirname + '/public'))
-//    .use(cors())
-//    .use(cookieParser());
+const router = express.Router();
 
-app.get('/login', function(req, res) {
+router.get('/login', function(req, res) {
+  console.log(res)
 
   var state = generateRandomString(16);
   res.cookie(stateKey, state);
@@ -70,7 +69,7 @@ app.get('/login', function(req, res) {
     }));
 });
 
-app.get('/callback', function(req, res) {
+router.get('/callback', function(req, res) {
 
   // our application requests refresh and access tokens
   // after checking the state parameter
@@ -132,7 +131,7 @@ app.get('/callback', function(req, res) {
   }
 });
 
-app.get('/refresh_token', function(req, res) {
+router.get('/refresh_token', function(req, res) {
 
   // requesting access token from refresh token
   var refresh_token = req.query.refresh_token;
