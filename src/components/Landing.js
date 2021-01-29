@@ -10,17 +10,27 @@ class Landing extends Component {
 
   render() {
     return (
-    <div class="container">
+    <div className="container"
+      style={{
+        width: '100vw',
+        height: '100vh',
+        position: 'relative'
+      }}>
       <div id="login">
-        <div class="title"
+        <div className="title"
         style={{
           position: 'absolute',
           margin: '0 auto',
-          textQlign: 'center',
+          textAlign: 'center',
+          width: '100%',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)'
         }}
         >
         <h1
           style={{
+            fontSize: '300px',
             fontFamily: 'Six Caps, sans-serif',
             fontWeight: 'normal',
             lineHeight: 1,
@@ -40,15 +50,15 @@ class Landing extends Component {
             bottom: '20px'
           }}
         >
-        <div class="arrow"
+        <div className="arrow"
         style={{
           transform: 'rotate(258deg)',
           position: 'absolute',
-          right: '70px',
-          top: '-120px'
+          right: '80px',
+          top: '-100px'
           }}
         >
-          <div class="greeting"
+          <div className="greeting"
           style={{
             fontFamily: 'Rock Salt, cursive',
             transform: 'rotate(90deg)'
