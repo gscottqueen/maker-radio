@@ -11,6 +11,7 @@ require('dotenv').config()
 var express = require('express'); // Express web server framework
 var request = require('request'); // "Request" library
 var cors = require('cors');
+const serverless = require('serverless-http');
 var querystring = require('querystring');
 var cookieParser = require('cookie-parser');
 
@@ -18,6 +19,8 @@ var client_id = process.env.CLIENT_ID;
 var client_secret = process.env.CLIENT_SECRET;
 var redirect_uri = process.env.REACT_APP_AUTH_DOMAIN + process.env.REDIRECT_URI;
 var callback_uri = process.env.REACT_APP_APP_DOMAIN
+const router = express.Router();
+const path = require('path');
 
 console.log(client_id);
 console.log(client_secret);
@@ -149,5 +152,8 @@ app.get('/refresh_token', function(req, res) {
   });
 });
 
-console.log('Listening on 8888');
-app.listen(8888);
+app.use('/.netlify/functions/server', router);  // path must route to lambda
+app.use('/', (req, res) => res.sendFile(path.join(__dirname, '../index.html')));
+
+module.exports = app;
+module.exports.handler = serverless(app);

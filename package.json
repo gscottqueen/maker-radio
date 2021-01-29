@@ -16,14 +16,17 @@
     "cors": "^2.8.4",
     "express": "~4.16.0",
     "querystring": "~0.2.0",
-    "request": "~2.83.0"
+    "request": "~2.83.0",
+    "nodemon": "^1.19.2",
+    "serverless-http": "^2.3.0",
+    "netlify-lambda": "^1.6.3"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "auth-serve": "node ./server.js "
+    "auth-serve": "nodemon server-local.js "
   },
   "eslintConfig": {
     "extends": "react-app"
