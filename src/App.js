@@ -3,13 +3,15 @@ import React, { Component } from 'react';
 // Components
 // import PlayerButton from './components/PlayerButton';
 import SpotifyButton from './components/SpotifyButton';
-import AlbumList from './components/AlbumList';
+// import AlbumList from './components/AlbumList';
 import NowPlaying from './components/NowPlaying';
-import PodcastList from './components/PodcastList';
+// import PodcastList from './components/PodcastList';
+import Landing from './components/Landing'
 
 // Spotify wrapper library
 var Spotify = require('spotify-web-api-js');
 var spotifyApi = new Spotify();
+
 
 class App extends Component {
 
@@ -369,6 +371,7 @@ class App extends Component {
   render() {
     return (
       <div className="App">
+      <Landing />
       {this.state.loggedIn && this.state.user.response === false ? this.getUserProfile() : null }
         <div>
           <NowPlaying
