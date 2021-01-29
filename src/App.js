@@ -108,9 +108,8 @@ class App extends Component {
           // since we have the player we can now cancel the interval
           clearInterval(this.playerCheckInterval);
           // and get our playlist
-          // this.getMakerRadioPlaylist()
-          this.getPodcasts()
           this.getMakerRadioPlaylist()
+          // this.getPodcasts()
           console.log('playlist', this.state.makerPlaylist)
         }
       })
@@ -166,7 +165,7 @@ class App extends Component {
     })
   }
 // spotify:show:2GM7Lo15uxyqhIv5uXfBpM
-  playRadio(deviceID){
+  playPodcast(deviceID){
     console.log('deviceID', deviceID)
     console.log('context', this.state.context)
     console.log('makerPlaylist', this.state.makerPlaylist)
@@ -193,28 +192,55 @@ class App extends Component {
       }
     }
 
-      // playPodcast(deviceID){
-      //   if (this.makerPlaylist !== '') {
-      //     fetch('https://api.spotify.com/v1/me/player/play?device_id=' + deviceID + '', {
-      //       method: 'PUT',
-      //       body: JSON.stringify({
-      //         "context_uri": 'spotify:playlist:' + this.state.makerPlaylist + '',
-      //         "offset": {
-      //           "position": this.state.offsetPosition,
-      //         },
-      //         "position_ms": 0,
-      //       }),
-      //       headers: {
-      //         'Content-Type': 'application/json',
-      //         "Authorization": 'Bearer ' + this.state.token + ''
-      //       }
-      //     }).then(
-      //       this.player.togglePlay().then(() => {
-      //         this.player.setVolume(0.1)
-      //       })
-      //     )
-      //   }
-      // }
+    getMakerRadioPlaylist(){
+      console.log('fired')
+      if (this.state.makerPlaylist !== ''){
+        spotifyApi.getPlaylist(this.state.makerPlaylist)
+        .then((response) => {
+          if(response) {
+            const tracks = response.tracks.items || response.items
+            // select a random track to offset
+            const length = tracks.length
+            const randomTrack = Math.floor((Math.random() * length))
+            const id = tracks[randomTrack].track.id || tracks[randomTrack].id
+            window.localStorage.setItem('Track ID', id)
+            // remove any index from 0 to our random track
+            let cutPlaylist = tracks.splice(randomTrack + 1)
+            // rebuild our playlist with the random track in the nowPlaying position and its next index in the first index of the playlist
+            const newPlaylist = cutPlaylist.concat(tracks)
+
+            this.setState({
+              albumsResponse: newPlaylist,
+              offsetPosition: randomTrack,
+              context: 'playlist'
+            })
+          }
+        })
+      }
+    }
+
+    playRadio(deviceID){
+      if (this.makerPlaylist !== '') {
+        fetch('https://api.spotify.com/v1/me/player/play?device_id=' + deviceID + '', {
+          method: 'PUT',
+          body: JSON.stringify({
+            "context_uri": 'spotify:playlist:' + this.state.makerPlaylist + '',
+            "offset": {
+              "position": this.state.offsetPosition,
+            },
+            "position_ms": 0,
+          }),
+          headers: {
+            'Content-Type': 'application/json',
+            "Authorization": 'Bearer ' + this.state.token + ''
+          }
+        }).then(
+          this.player.togglePlay().then(() => {
+            this.player.setVolume(0.1)
+          })
+        )
+      }
+    }
 
    getPodcasts() {
       fetch('https://api.spotify.com/v1/shows/2GM7Lo15uxyqhIv5uXfBpM/episodes', {
@@ -237,92 +263,37 @@ class App extends Component {
         })
     }
 
-  getMakerRadioPlaylist(){
-    console.log('fired')
-    if (this.state.makerPlaylist !== ''){
-      spotifyApi.getPlaylist(this.state.makerPlaylist)
-      .then((response) => {
-        if(response) {
-          const tracks = response.tracks.items || response.items
-          // select a random track to offset
-          const length = tracks.length
-          const randomTrack = Math.floor((Math.random() * length))
-          const id = tracks[randomTrack].track.id || tracks[randomTrack].id
-          window.localStorage.setItem('Track ID', id)
-          // remove any index from 0 to our random track
-          let cutPlaylist = tracks.splice(randomTrack + 1)
-          // rebuild our playlist with the random track in the nowPlaying position and its next index in the first index of the playlist
-          const newPlaylist = cutPlaylist.concat(tracks)
-
-          this.setState({
-            albumsResponse: newPlaylist,
-            offsetPosition: randomTrack,
-            context: 'playlist'
-          })
-        }
-      })
-    }
-  }
-
-  // getPodcast(){
-  //   if (this.state.makerPlaylist !== ''){
-  //     spotifyApi.getPodcastPlaylist(this.state.makerPlaylist)
-  //     .then((response) => {
-  //       if(response) {
-  //         const tracks = response.tracks.items || response.items
-  //         // select a random track to offset
-  //         const length = tracks.length
-  //         const randomTrack = Math.floor((Math.random() * length))
-  //         const id = tracks[randomTrack].track.id || tracks[randomTrack].id
-  //         window.localStorage.setItem('Track ID', id)
-  //         // remove any index from 0 to our random track
-  //         let cutPlaylist = tracks.splice(randomTrack + 1)
-  //         // rebuild our playlist with the random track in the nowPlaying position and its next index in the first index of the playlist
-  //         const newPlaylist = cutPlaylist.concat(tracks)
-
+  // getPlayingContent() {
+  //   fetch('https://api.spotify.com/v1/me/player/currently-playing', {
+  //     method: 'GET',
+  //     headers: {
+  //       'Content-Type': 'application/json',
+  //       "Authorization": 'Bearer ' + this.state.token + ''
+  //     }
+  //   }).then(response => response.json())
+  //     .then(data => {
+  //       console.log({data})
   //         this.setState({
-  //           albumsResponse: newPlaylist,
-  //           offsetPosition: randomTrack,
-  //           context: 'show'
-  //         })
-  //       }
+  //         podcastResponse: data.items,
+  //         makerPlaylist: data.items,
+  //         podcastimage: data.items[0].images[0].url,
+  //         podcastname: data.items[0].name,
+  //         podcastdescription: data.items[0].description,
+  //         context: 'show'
+  //       })
   //     })
-  //   }
   // }
-
-     getPlayingContent() {
-      fetch('https://api.spotify.com/v1/me/player/currently-playing', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          "Authorization": 'Bearer ' + this.state.token + ''
-        }
-      }).then(response => response.json())
-        .then(data => {
-          console.log(data)
-           this.setState({
-            // podcastResponse: data.items,
-            // makerPlaylist: data.items,
-            // podcastimage: data.items[0].images[0].url,
-            // podcastname: data.items[0].name,
-            // podcastdescription: data.items[0].description,
-            // context: 'show'
-          })
-        })
-    }
 
   getNowPlaying(){
     spotifyApi.getMyCurrentPlaybackState()
       .then((response) => {
-        console.log("nowplaying", response)
-        console.log(this.state.podcastimage)
-        console.log(this.state.podcastname)
-        if (response && this.state.podcastimage && this.state.podcastname) {
+        console.log("nowplaying", {response})
+        if (response) {
           this.setState({
             nowPlayingResponse: {
-              imgSrc: this.state.podcastimage,
-              albumName: this.state.podcastname,
-              artistName: this.state.podcastdescription,
+              imgSrc: response.item.album.images[0].url || this.state.podcastimage,
+              albumName: response.item.album.name || this.state.podcastname,
+              artistName: response.item.album.artists[0].name || this.state.podcastdescription,
             }
           })
         }
@@ -366,16 +337,20 @@ class App extends Component {
   }
 
   render() {
+
+    console.log('nowPlaying', this.state.nowPlayingResponse)
+    console.log('user', this.state.user.response)
+    console.log('loggedin', this.loggedIn)
     return (
       <div className="App">
-      {this.state.loggedIn === false ? <Landing /> : null }
       {this.state.loggedIn && this.state.user.response === false ? this.getUserProfile() : null }
+      {this.state.loggedIn === false ? <Landing /> :
         <div>
           <NowPlaying
             imgSrc={this.state.nowPlayingResponse.imgSrc}
             albumName={this.state.nowPlayingResponse.albumName}
             artistName={this.state.nowPlayingResponse.artistName}/>
-        </div>
+        </div> }
         {this.player ?
           <div style={{ position: 'absolute', left: '40px', bottom: '24px' }}>
             <button
