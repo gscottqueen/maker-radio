@@ -44,14 +44,16 @@ class SpotifyButton extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      href: 'http://localhost:8888',
+      href: `${process.env.REACT_APP_AUTH_DOMAIN}login`,
     }
   }
 
+
   render() {
+    console.log(process.env.REACT_APP_AUTH_DOMAIN)
     return (
       <SpotifyWrapper>
-        <SpotifyLogin 
+        <SpotifyLogin
           href={this.state.href}>
             { !this.props.profileImage ? <SpotifyLogo src={spotifyLogo} alt="spotify logo"/> :
              <UserProfileImage src={this.props.profileImage} alt="your user profile image"/> }
