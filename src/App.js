@@ -1,11 +1,8 @@
 import React, { Component } from 'react';
 
 // Components
-// import PlayerButton from './components/PlayerButton';
 import SpotifyButton from './components/SpotifyButton';
-// import AlbumList from './components/AlbumList';
 import NowPlaying from './components/NowPlaying';
-// import PodcastList from './components/PodcastList';
 import Landing from './components/Landing'
 
 // Spotify wrapper library
@@ -91,7 +88,7 @@ class App extends Component {
           user: {
             response: true,
             name: response.display_name,
-            image: response.images[0].url && response.images[0].url
+            image: response.images[0] ? response.images[0].url : null
           }
         });
       })
@@ -371,15 +368,13 @@ class App extends Component {
   render() {
     return (
       <div className="App">
-      <Landing />
+      {this.state.loggedIn === false ? <Landing /> : null }
       {this.state.loggedIn && this.state.user.response === false ? this.getUserProfile() : null }
         <div>
           <NowPlaying
             imgSrc={this.state.nowPlayingResponse.imgSrc}
             albumName={this.state.nowPlayingResponse.albumName}
             artistName={this.state.nowPlayingResponse.artistName}/>
-          {/* <PodcastList
-            podcastResponse={this.state.podcastResponse}/> */}
         </div>
         {this.player ?
           <div style={{ position: 'absolute', left: '40px', bottom: '24px' }}>
