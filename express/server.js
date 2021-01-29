@@ -19,6 +19,7 @@ var client_id = process.env.CLIENT_ID;
 var client_secret = process.env.CLIENT_SECRET;
 var redirect_uri = process.env.REACT_APP_AUTH_DOMAIN + process.env.REDIRECT_URI;
 var callback_uri = process.env.REACT_APP_APP_DOMAIN
+var build_index = process.env.BUILD_INDEX
 const router = express.Router();
 const path = require('path');
 
@@ -45,11 +46,14 @@ var stateKey = 'spotify_auth_state';
 
 var app = express();
 
-app.use(express.static(__dirname + '/public'))
-   .use(cors())
+app.use(cors())
    .use(cookieParser());
 
-router.get('/login', function(req, res) {
+// app.use(express.static(__dirname + '/public'))
+//    .use(cors())
+//    .use(cookieParser());
+
+app.get('/login', function(req, res) {
 
   var state = generateRandomString(16);
   res.cookie(stateKey, state);
@@ -66,7 +70,7 @@ router.get('/login', function(req, res) {
     }));
 });
 
-router.get('/callback', function(req, res) {
+app.get('/callback', function(req, res) {
 
   // our application requests refresh and access tokens
   // after checking the state parameter
@@ -128,7 +132,7 @@ router.get('/callback', function(req, res) {
   }
 });
 
-router.get('/refresh_token', function(req, res) {
+app.get('/refresh_token', function(req, res) {
 
   // requesting access token from refresh token
   var refresh_token = req.query.refresh_token;
@@ -153,7 +157,7 @@ router.get('/refresh_token', function(req, res) {
 });
 
 app.use('/.netlify/functions/server', router);  // path must route to lambda
-app.use('/', (req, res) => res.sendFile(path.join(__dirname, '../index.html')));
+app.use('/', (req, res) => res.sendFile(path.join(__dirname, build_index)));
 
 module.exports = app;
 module.exports.handler = serverless(app);
