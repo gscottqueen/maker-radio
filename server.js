@@ -16,7 +16,7 @@ var cookieParser = require('cookie-parser');
 
 var client_id = process.env.CLIENT_ID;
 var client_secret = process.env.CLIENT_SECRET;
-var redirect_uri = process.env.DOMAIN + process.env.REDIRECT_URI;
+var redirect_uri = process.env.AUTH_DOMAIN + process.env.REDIRECT_URI;
 
 console.log(client_id);
 console.log(client_secret);
