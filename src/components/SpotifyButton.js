@@ -50,7 +50,6 @@ class SpotifyButton extends Component {
 
 
   render() {
-    console.log(process.env.REACT_APP_AUTH_DOMAIN)
     return (
       <SpotifyWrapper>
         <SpotifyLogin
