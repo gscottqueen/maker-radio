@@ -17,6 +17,7 @@ var cookieParser = require('cookie-parser');
 var client_id = process.env.CLIENT_ID;
 var client_secret = process.env.CLIENT_SECRET;
 var redirect_uri = process.env.REACT_APP_AUTH_DOMAIN + process.env.REDIRECT_URI;
+var callback_uri = process.env.REACT_APP_APP_DOMAIN
 
 console.log(client_id);
 console.log(client_secret);
@@ -109,7 +110,7 @@ app.get('/callback', function(req, res) {
         });
 
         // we can also pass the token to the browser to make requests from there
-        res.redirect(process.env.REACT_APP_APP_DOMAIN+ '#' +
+        res.redirect(callback_uri+ '#' +
           querystring.stringify({
             access_token: access_token,
             refresh_token: refresh_token
