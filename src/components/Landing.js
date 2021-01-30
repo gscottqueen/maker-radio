@@ -23,14 +23,14 @@ class Landing extends Component {
           margin: '0 auto',
           textAlign: 'center',
           width: '100%',
-          top: '50%',
+          top: '45%',
           left: '50%',
           transform: 'translate(-50%, -50%)'
         }}
         >
         <h1
           style={{
-            fontSize: '300px',
+            fontSize: '200px',
             fontFamily: 'Six Caps, sans-serif',
             fontWeight: 'normal',
             lineHeight: 1,
@@ -40,6 +40,9 @@ class Landing extends Component {
         <h2
           style={{
             fontWeight: 'normal',
+            fontSize: '20px',
+            maxWidth: '80%',
+            margin: '40px auto'
           }}
         >Scientifically proven to make you smarter.</h2>
         </div>
