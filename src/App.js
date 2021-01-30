@@ -351,7 +351,8 @@ class App extends Component {
             albumName={this.state.nowPlayingResponse.albumName}
             artistName={this.state.nowPlayingResponse.artistName}/>
         </div> }
-        {this.player ?
+        {this.state.loggedIn && this.player ?
+        <>
           <div style={{ position: 'absolute', left: '40px', bottom: '24px' }}>
             <button
               style={{
@@ -416,10 +417,12 @@ class App extends Component {
               left: '24px',
             }}></div>
             </button>
-          </div>: null }
-        <div style={{ position : 'absolute', right: '20px', bottom: '20px' }}>
-            <SpotifyButton profileImage={this.state.user.image}></SpotifyButton>
-        </div>
+          </div>
+          <div style={{ position : 'absolute', right: '20px', bottom: '20px' }}>
+              <SpotifyButton profileImage={this.state.user.image}></SpotifyButton>
+          </div>
+          </>
+          : null }
       </div>
     );
   }
