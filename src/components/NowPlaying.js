@@ -8,9 +8,8 @@ import Palette from 'react-palette'
 
 // our styles
 const AlbumBlockWrapper = styled.div`
-  padding: 75px 100px 0px;
+  padding: 75px 10px 0px;
   background-image: linear-gradient( ${props => props.palette.lightVibrant !== null ? props.palette.lightVibrant : props.palette.vibrant }, #FFF );
-  /* width: 100%; */
 `;
 
 const AlbumBlockTitle = styled.h1`
@@ -20,19 +19,17 @@ const AlbumBlockTitle = styled.h1`
 `;
 
 const AlbumBlock = styled.div`
-  /* margin: 5px auto; */
   width: fit-content;
-  margin: 0 auto;
+  margin: 0 auto 20px;
 `;
 
 const AlbumImage = styled.img`
-  /* display: flex;
-  margin: 5px auto;
-  width: auto;
-  height: auto;
-  max-height: 525px;
-  transform: translateZ(20px); */
   transform-style: preserve-3d;
+  max-height: 70vh;
+  min-height: auto;
+  min-width: 100%;
+  width: auto;
+  max-width: 100%;
 `;
 
 const AlbumTitleBlock = styled.div`
