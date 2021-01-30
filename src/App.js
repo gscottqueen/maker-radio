@@ -263,27 +263,6 @@ class App extends Component {
         })
     }
 
-  // getPlayingContent() {
-  //   fetch('https://api.spotify.com/v1/me/player/currently-playing', {
-  //     method: 'GET',
-  //     headers: {
-  //       'Content-Type': 'application/json',
-  //       "Authorization": 'Bearer ' + this.state.token + ''
-  //     }
-  //   }).then(response => response.json())
-  //     .then(data => {
-  //       console.log({data})
-  //         this.setState({
-  //         podcastResponse: data.items,
-  //         makerPlaylist: data.items,
-  //         podcastimage: data.items[0].images[0].url,
-  //         podcastname: data.items[0].name,
-  //         podcastdescription: data.items[0].description,
-  //         context: 'show'
-  //       })
-  //     })
-  // }
-
   getNowPlaying(){
     spotifyApi.getMyCurrentPlaybackState()
       .then((response) => {
