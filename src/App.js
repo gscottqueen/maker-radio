@@ -4,6 +4,10 @@ import React, { Component } from 'react';
 import SpotifyButton from './components/SpotifyButton';
 import NowPlaying from './components/NowPlaying';
 import Landing from './components/Landing'
+// svgs
+import doubleArrow from './images/double-arrow.svg'
+import pause from './images/pause.svg'
+import play from './images/play.svg'
 
 // Spotify wrapper library
 var Spotify = require('spotify-web-api-js');
@@ -320,6 +324,7 @@ class App extends Component {
     console.log('nowPlaying', this.state.nowPlayingResponse)
     console.log('user', this.state.user.response)
     console.log('loggedin', this.loggedIn)
+    console.log('switch', this.state.track.staticSwitch)
     return (
       <div className="App">
       {this.state.loggedIn && this.state.user.response === false ? this.getUserProfile() : null }
@@ -332,31 +337,50 @@ class App extends Component {
         </div> }
         {this.state.loggedIn && this.player ?
         <>
-          <div style={{ position: 'absolute', left: '40px', bottom: '24px' }}>
+          <div
+            style={{
+              position: 'absolute',
+              left: '40px',
+              bottom: '24px' ,
+              display: 'flex'
+              }}>
             <button
               style={{
                 height: '60px',
                 width: '60px',
                 border: 'none',
                 borderRadius: '50px',
-                background: 'linear-gradient(145deg, #e6e6e6b3, #ffffff)',
+                backgroundColor: 'linear-gradient(145deg, #e6e6e6b3, #ffffff)',
                 boxShadow: '20px 20px 60px #d9d9d9',
                 margin: '20px 20px 20px 0px',
-                position: 'relative'
+                position: 'relative',
+                transform: 'scaleX(-1)',
+                background: `url(${doubleArrow}) no-repeat left`,
+                backgroundSize: '30px',
+                backgroundPosition: '18px 15px',
+                cursor: 'pointer'
               }}
               onClick={this.handlePrevTrack}
+             />
+            <button
+            style={{
+              height: '60px',
+              width: '60px',
+              border: 'none',
+              borderRadius: '50px',
+              backgroundColor: 'linear-gradient(145deg, #e6e6e6b3, #ffffff)',
+              boxShadow: '20px 20px 60px #d9d9d9',
+              margin: '20px 20px 20px 0px',
+              cursor: 'pointer',
+              background: `${
+                this.state.track.staticSwitch === "Play" ?
+                `no-repeat center/80% 35px url(${play})` :
+                `no-repeat center/80% 35px url(${pause})`
+                }`,
+              }}
+              aria-label={this.state.track.staticSwitch}
+              onClick={this.handleTrackStatic}
             >
-             <div className="arrow-left" style={{
-              width: '0',
-              height: '0',
-              borderTop: '10px solid transparent',
-              borderBottom: '10px solid transparent',
-              borderRight: '18px solid rgba(0,0,0,0.22)',
-              background: 'linear-gradient(135deg, rgba(0,0,0,0.22), rgba(255,255,255,0.25))',
-              position: 'absolute',
-              top: '20px',
-              right: '24px'
-            }}></div>
             </button>
             <button
               style={{
@@ -364,37 +388,18 @@ class App extends Component {
                 width: '60px',
                 border: 'none',
                 borderRadius: '50px',
-                background: 'linear-gradient(145deg, #e6e6e6b3, #ffffff)',
-                boxShadow: '20px 20px 60px #d9d9d9',
-                margin: '20px 20px 20px 0px'
-              }}
-              onClick={this.handleTrackStatic}
-            >{this.state.track.staticSwitch}</button>
-            <button
-              style={{
-                height: '60px',
-                width: '60px',
-                border: 'none',
-                borderRadius: '50px',
-                background: 'linear-gradient(145deg, #e6e6e6b3, #ffffff)',
+                backgroundColor: 'linear-gradient(145deg, #e6e6e6b3, #ffffff)',
                 boxShadow: '20px 20px 60px #d9d9d9',
                 margin: '20px 20px 20px 0px',
-                position: 'relative'
+                position: 'relative',
+                background: `url(${doubleArrow}) no-repeat left`,
+                backgroundSize: '30px',
+                backgroundPosition: '18px 15px',
+                cursor: 'pointer'
               }}
               onClick={this.handleNextTrack}
               aria-label="Next"
             >
-            <div className="arrow-right" style={{
-              width: '0',
-              height: '0',
-              borderTop: '10px solid transparent',
-              borderBottom: '10px solid transparent',
-              borderLeft: '18px solid rgba(0,0,0,0.22)',
-              background: 'linear-gradient(135deg, rgba(0,0,0,0.22), rgba(255,255,255,0.25))',
-              position: 'absolute',
-              top: '20px',
-              left: '24px',
-            }}></div>
             </button>
           </div>
           <div style={{ position : 'absolute', right: '20px', bottom: '20px' }}>
