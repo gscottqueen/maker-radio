@@ -338,6 +338,8 @@ class App extends Component {
             albumName={this.state.nowPlayingResponse.albumName}
             artistName={this.state.nowPlayingResponse.artistName}/>
         </div> }
+        { this.state.user && this.state.loggedIn === undefined ? <div>Oh the sadness. You must have a premium Spotify account. Sorry about that, guess they just wanna make their monies. :(</div> : null
+        }
         {this.state.loggedIn && this.player ?
         <>
           <div
