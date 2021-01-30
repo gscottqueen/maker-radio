@@ -58,7 +58,7 @@ const NowPlaying = (props) => {
         <AlbumBlockWrapper palette={palette}>
             <AlbumBlock>
             { props.imgSrc &&
-            <AlbumBlockTitle palette={palette}>Now Playing</AlbumBlockTitle> }
+            <AlbumBlockTitle palette={palette} style={{ fontFamily: 'Rock Salt, cursive', fontSize: '20px'}}>NOW PLAYING</AlbumBlockTitle> }
               {props.imgSrc &&
               <Tilt
               style={{ backgroundColor: 'transparent' }}

@@ -46,7 +46,7 @@ class Landing extends Component {
         <div id="spotify-button"
           style={{
             position: 'absolute',
-            right: '20px',
+            right: '5%',
             bottom: '20px'
           }}
         >

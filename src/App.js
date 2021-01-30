@@ -4,7 +4,9 @@ import React, { Component } from 'react';
 import SpotifyButton from './components/SpotifyButton';
 import NowPlaying from './components/NowPlaying';
 import Landing from './components/Landing'
-// svgs
+
+
+// assets
 import doubleArrow from './images/double-arrow.svg'
 import pause from './images/pause.svg'
 import play from './images/play.svg'
@@ -12,7 +14,6 @@ import play from './images/play.svg'
 // Spotify wrapper library
 var Spotify = require('spotify-web-api-js');
 var spotifyApi = new Spotify();
-
 
 class App extends Component {
 
@@ -69,6 +70,8 @@ class App extends Component {
     this.setState({
       makerPlaylist: list,
      })
+
+     console.log(this.state.mobile)
   }
 
   // Obtains our parameters from the hash of the URL @return Object
@@ -340,9 +343,11 @@ class App extends Component {
           <div
             style={{
               position: 'absolute',
-              left: '40px',
-              bottom: '24px' ,
-              display: 'flex'
+              width: '200px',
+              left: '5%',
+              bottom: '24px',
+              display: 'flex',
+              justifyContent: 'space-around'
               }}>
             <button
               style={{
@@ -352,7 +357,7 @@ class App extends Component {
                 borderRadius: '50px',
                 backgroundColor: 'linear-gradient(145deg, #e6e6e6b3, #ffffff)',
                 boxShadow: '20px 20px 60px #d9d9d9',
-                margin: '20px 20px 20px 0px',
+                margin: '20px 0px',
                 position: 'relative',
                 transform: 'scaleX(-1)',
                 background: `url(${doubleArrow}) no-repeat left`,
@@ -369,8 +374,8 @@ class App extends Component {
               border: 'none',
               borderRadius: '50px',
               backgroundColor: 'linear-gradient(145deg, #e6e6e6b3, #ffffff)',
-              boxShadow: '20px 20px 60px #d9d9d9',
-              margin: '20px 20px 20px 0px',
+              boxShadow: '20px 16px 60px #d9d9d9',
+              margin: '20px 0px',
               cursor: 'pointer',
               background: `${
                 this.state.track.staticSwitch === "Play" ?
@@ -390,7 +395,7 @@ class App extends Component {
                 borderRadius: '50px',
                 backgroundColor: 'linear-gradient(145deg, #e6e6e6b3, #ffffff)',
                 boxShadow: '20px 20px 60px #d9d9d9',
-                margin: '20px 20px 20px 0px',
+                margin: '20px 0px',
                 position: 'relative',
                 background: `url(${doubleArrow}) no-repeat left`,
                 backgroundSize: '30px',
@@ -402,7 +407,7 @@ class App extends Component {
             >
             </button>
           </div>
-          <div style={{ position : 'absolute', right: '20px', bottom: '20px' }}>
+          <div style={{ position : 'absolute', right: '5%', bottom: '20px' }}>
               <SpotifyButton profileImage={this.state.user.image}></SpotifyButton>
           </div>
           </>
