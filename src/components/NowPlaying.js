@@ -8,7 +8,7 @@ import Palette from 'react-palette'
 
 // our styles
 const AlbumBlockWrapper = styled.div`
-  padding: 75px 10px 0px;
+  padding: 100px 10px 0px;
   background-image: linear-gradient( ${props => props.palette.lightVibrant !== null ? props.palette.lightVibrant : props.palette.vibrant }, #FFF );
 `;
 
@@ -58,7 +58,7 @@ const NowPlaying = (props) => {
         <AlbumBlockWrapper palette={palette}>
             <AlbumBlock>
             { props.imgSrc &&
-            <AlbumBlockTitle palette={palette} style={{ fontFamily: 'Rock Salt, cursive', fontSize: '20px'}}>NOW PLAYING</AlbumBlockTitle> }
+            <AlbumBlockTitle palette={palette} style={{ fontFamily: 'Rock Salt, cursive', fontSize: '20px', marginTop: '40px'}}>NOW PLAYING</AlbumBlockTitle> }
               {props.imgSrc &&
               <Tilt
               style={{ backgroundColor: 'transparent' }}
